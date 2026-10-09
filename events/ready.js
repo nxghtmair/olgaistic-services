@@ -8,26 +8,24 @@ module.exports = {
     console.log(`Logged in as ${client.user.tag}`);
 
     const CHANNEL_ID = "1555618153231552584";
+    const MESSAGE_ID = "1558117679657652289"; // the ONLY message to edit
 
-    const data = load();
     const channel = await client.channels.fetch(CHANNEL_ID);
 
-    if (!data.leaderboardMessageId) {
-      const { weeklyEmbed, overallEmbed } = buildLeaderboards(client);
-      const msg = await channel.send({ embeds: [weeklyEmbed, overallEmbed] });
-      data.leaderboardMessageId = msg.id;
-      save(data);
-    }
-
+    // auto update every 15 seconds
     setInterval(async () => {
-      const data = load();
-      const msg = await channel.messages.fetch(data.leaderboardMessageId);
+      try {
+        const msg = await channel.messages.fetch(MESSAGE_ID);
 
-      const { weeklyEmbed, overallEmbed } = buildLeaderboards(client);
+        const { weeklyEmbed, overallEmbed } = buildLeaderboards(client);
 
-      await msg.edit({ embeds: [weeklyEmbed, overallEmbed] });
+        await msg.edit({ embeds: [weeklyEmbed, overallEmbed] });
+      } catch (err) {
+        console.log("Leaderboard edit error:", err);
+      }
     }, 15000);
 
+    // weekly reset every Monday 00:00
     setInterval(() => {
       const now = new Date();
       if (now.getDay() === 1 && now.getHours() === 0 && now.getMinutes() === 0) {
@@ -38,6 +36,7 @@ module.exports = {
       }
     }, 60000);
 
+    // register slash commands
     await client.application.commands.set(
       client.commands.map(cmd => cmd.data)
     );

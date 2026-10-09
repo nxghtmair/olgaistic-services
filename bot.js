@@ -1,6 +1,13 @@
-const { Client, GatewayIntentBits, Collection } = require("discord.js");
-const fs = require("fs");
-const path = require("path");
+const { 
+  Client, 
+  GatewayIntentBits, 
+  ActivityType,
+  Collection 
+} = require("discord.js");
+require("dotenv").config();
+
+const statusConfig = require("./status.js");
+const stickyRR = require("./stickyrr.js");
 
 const client = new Client({
   intents: [
@@ -12,26 +19,41 @@ const client = new Client({
 
 client.commands = new Collection();
 
-// Load commands
-const commandsPath = path.join(__dirname, "commands");
-const commandFiles = fs.readdirSync(commandsPath).filter(f => f.endsWith(".js"));
+// Register command
+client.commands.set("stickyrr", stickyRR);
 
-for (const file of commandFiles) {
-  const command = require(`./commands/${file}`);
-  client.commands.set(command.data.name, command);
-}
+// Ready
+client.once("ready", () => {
+  console.log(`Logged in as ${client.user.tag}`);
 
-// Load events
-const eventsPath = path.join(__dirname, "events");
-const eventFiles = fs.readdirSync(eventsPath).filter(f => f.endsWith(".js"));
+  // Apply status
+  client.user.setStatus(statusConfig.presence.status);
+  client.user.setActivity(statusConfig.presence.activity.name, {
+    type: ActivityType[statusConfig.presence.activity.type]
+  });
 
-for (const file of eventFiles) {
-  const event = require(`./events/${file}`);
-  if (event.once) {
-    client.once(event.name, (...args) => event.execute(...args, client));
-  } else {
-    client.on(event.name, (...args) => event.execute(...args, client));
+  console.log("Status loaded from status.js");
+});
+
+// Interaction handler
+client.on("interactionCreate", async (interaction) => {
+  if (interaction.isChatInputCommand()) {
+    const cmd = client.commands.get(interaction.commandName);
+    if (cmd) return cmd.execute(interaction);
   }
-}
+
+  if (interaction.isModalSubmit()) {
+    return stickyRR.handleModal(interaction);
+  }
+
+  if (interaction.isButton()) {
+    return stickyRR.handleButton(interaction);
+  }
+});
+
+// Sticky message handler
+client.on("messageCreate", async (message) => {
+  stickyRR.handleMessage(message);
+});
 
 client.login(process.env.TOKEN);

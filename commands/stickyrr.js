@@ -57,10 +57,19 @@ module.exports = {
     const roleId = interaction.fields.getTextInputValue("stickyrr_role");
     const emoji = interaction.fields.getTextInputValue("stickyrr_emoji");
 
+    // Load role object
+    const role = interaction.guild.roles.cache.get(roleId);
+    if (!role) {
+      return interaction.reply({
+        content: "❌ Role not found. Check the ID.",
+        ephemeral: true
+      });
+    }
+
     const embed = new EmbedBuilder()
       .setTitle("⇢ ˗ˏˋ Sticky Reaction Role ࿐ྂ")
       .setDescription(
-        `hey bitch, are you interested in being notified about future posts from this channel?\npress the button to obtain the <@${roleId}> role !`
+        `hey bitch, are you interested in being notified about future posts from this channel?\npress the button to obtain the ${role} role !`
       )
       .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" })
       .setColor("#8B0000");

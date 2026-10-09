@@ -1,3 +1,4 @@
+const { ActivityType } = require("discord.js");
 const { load, save } = require("../utils/chatTracker");
 const buildLeaderboards = require("../utils/leaderboardBuilder");
 
@@ -7,7 +8,7 @@ module.exports = {
   async execute(client, statusConfig) {
     console.log(`Logged in as ${client.user.tag}`);
 
-    // Apply status
+    // FIXED: ActivityType now works
     client.user.setStatus(statusConfig.presence.status);
     client.user.setActivity(statusConfig.presence.activity.name, {
       type: ActivityType[statusConfig.presence.activity.type]

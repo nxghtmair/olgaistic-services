@@ -20,7 +20,7 @@ module.exports = {
       save(data);
     }
 
-    // auto update every minute
+    // auto update every 15 seconds
     setInterval(async () => {
       const data = load();
       const msg = await channel.messages.fetch(data.leaderboardMessageId);
@@ -28,7 +28,7 @@ module.exports = {
       const { weeklyEmbed, overallEmbed } = buildLeaderboards(client);
 
       await msg.edit({ embeds: [weeklyEmbed, overallEmbed] });
-    }, 60000);
+    }, 15000);
 
     // weekly reset every Monday 00:00
     setInterval(() => {

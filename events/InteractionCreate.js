@@ -2,7 +2,7 @@ const { EmbedBuilder } = require("discord.js");
 
 module.exports = {
   name: "interactionCreate",
-  async execute(interaction, client) {
+  async execute(interaction, client, stickyRR) {
 
     // Slash commands
     if (interaction.isChatInputCommand()) {
@@ -11,7 +11,17 @@ module.exports = {
       return command.execute(interaction, client);
     }
 
-    // Modal submit
+    // StickyRR modal
+    if (interaction.isModalSubmit() && interaction.customId === "stickyrr_modal") {
+      return stickyRR.handleModal(interaction);
+    }
+
+    // StickyRR button
+    if (interaction.isButton() && interaction.customId.startsWith("stickyrr_button_")) {
+      return stickyRR.handleButton(interaction);
+    }
+
+    // Embed creator modal
     if (interaction.isModalSubmit() && interaction.customId === "embed_create_modal") {
       const title = interaction.fields.getTextInputValue("embed_title");
       const desc = interaction.fields.getTextInputValue("embed_desc");

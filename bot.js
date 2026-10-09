@@ -1,13 +1,15 @@
-const { 
-  Client, 
-  GatewayIntentBits, 
-  ActivityType,
-  Collection 
-} = require("discord.js");
+const { Client, GatewayIntentBits, ActivityType, Collection } = require("discord.js");
 require("dotenv").config();
 
 const statusConfig = require("./status.js");
-const stickyRR = require("./stickyrr.js");
+
+// Commands
+const stickyRR = require("./commands/stickyrr.js");
+
+// Events
+const readyEvent = require("./events/ready.js");
+const messageEvent = require("./events/messageCreate.js");
+const interactionEvent = require("./events/InteractionCreate.js");
 
 const client = new Client({
   intents: [
@@ -18,42 +20,12 @@ const client = new Client({
 });
 
 client.commands = new Collection();
-
-// Register command
 client.commands.set("stickyrr", stickyRR);
 
-// Ready
-client.once("ready", () => {
-  console.log(`Logged in as ${client.user.tag}`);
+client.once("ready", () => readyEvent.execute(client, statusConfig));
 
-  // Apply status
-  client.user.setStatus(statusConfig.presence.status);
-  client.user.setActivity(statusConfig.presence.activity.name, {
-    type: ActivityType[statusConfig.presence.activity.type]
-  });
+client.on("messageCreate", (msg) => messageEvent.execute(msg, stickyRR));
 
-  console.log("Status loaded from status.js");
-});
-
-// Interaction handler
-client.on("interactionCreate", async (interaction) => {
-  if (interaction.isChatInputCommand()) {
-    const cmd = client.commands.get(interaction.commandName);
-    if (cmd) return cmd.execute(interaction);
-  }
-
-  if (interaction.isModalSubmit()) {
-    return stickyRR.handleModal(interaction);
-  }
-
-  if (interaction.isButton()) {
-    return stickyRR.handleButton(interaction);
-  }
-});
-
-// Sticky message handler
-client.on("messageCreate", async (message) => {
-  stickyRR.handleMessage(message);
-});
+client.on("interactionCreate", (interaction) => interactionEvent.execute(interaction, client, stickyRR));
 
 client.login(process.env.TOKEN);

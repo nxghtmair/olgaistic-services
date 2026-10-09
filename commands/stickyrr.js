@@ -9,7 +9,7 @@ const {
   ButtonStyle
 } = require("discord.js");
 
-let stickyRRData = {}; // per-channel sticky RR storage
+let stickyRRData = {};
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -22,7 +22,6 @@ module.exports = {
     ),
 
   async execute(interaction) {
-    // Only allow role 1558060373972746300
     if (!interaction.member.roles.cache.has("1558060373972746300")) {
       return interaction.reply({
         content: "You don't have permission to use this command.",
@@ -30,7 +29,6 @@ module.exports = {
       });
     }
 
-    // Modal
     const modal = new ModalBuilder()
       .setCustomId("stickyrr_modal")
       .setTitle("Sticky Reaction Role Setup");
@@ -56,14 +54,9 @@ module.exports = {
   },
 
   async handleModal(interaction) {
-    if (interaction.customId !== "stickyrr_modal") return;
-
     const roleId = interaction.fields.getTextInputValue("stickyrr_role");
     const emoji = interaction.fields.getTextInputValue("stickyrr_emoji");
 
-    const channel = interaction.channel;
-
-    // Embed
     const embed = new EmbedBuilder()
       .setTitle("⇢ ˗ˏˋ Sticky Reaction Role ࿐ྂ")
       .setDescription(
@@ -72,7 +65,6 @@ module.exports = {
       .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" })
       .setColor("#8B0000");
 
-    // Button
     const button = new ButtonBuilder()
       .setCustomId(`stickyrr_button_${roleId}`)
       .setEmoji(emoji)
@@ -80,10 +72,9 @@ module.exports = {
 
     const row = new ActionRowBuilder().addComponents(button);
 
-    // Send sticky message
-    const msg = await channel.send({ embeds: [embed], components: [row] });
+    const msg = await interaction.channel.send({ embeds: [embed], components: [row] });
 
-    stickyRRData[channel.id] = {
+    stickyRRData[interaction.channel.id] = {
       roleId,
       emoji,
       embed,
@@ -98,8 +89,6 @@ module.exports = {
   },
 
   async handleButton(interaction) {
-    if (!interaction.customId.startsWith("stickyrr_button_")) return;
-
     const roleId = interaction.customId.split("_")[2];
     const member = interaction.member;
 

@@ -4,11 +4,17 @@ const buildLeaderboards = require("../utils/leaderboardBuilder");
 module.exports = {
   name: "ready",
   once: true,
-  async execute(client) {
+  async execute(client, statusConfig) {
     console.log(`Logged in as ${client.user.tag}`);
 
+    // Apply status
+    client.user.setStatus(statusConfig.presence.status);
+    client.user.setActivity(statusConfig.presence.activity.name, {
+      type: ActivityType[statusConfig.presence.activity.type]
+    });
+
     const CHANNEL_ID = "1555618153231552584";
-    const MESSAGE_ID = "1558117679657652289"; // the ONLY message to edit
+    const MESSAGE_ID = "1558117679657652289";
 
     const channel = await client.channels.fetch(CHANNEL_ID);
 

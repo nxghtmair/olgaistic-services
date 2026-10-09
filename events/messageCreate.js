@@ -2,8 +2,13 @@ const { load, save } = require("../utils/chatTracker");
 
 module.exports = {
   name: "messageCreate",
-  async execute(message) {
+  async execute(message, stickyRR) {
     if (message.author.bot) return;
+
+    // Sticky RR handler
+    if (stickyRR && stickyRR.handleMessage) {
+      stickyRR.handleMessage(message);
+    }
 
     const data = load();
 

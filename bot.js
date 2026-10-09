@@ -1,4 +1,6 @@
-const { Client, GatewayIntentBits, ActivityType } = require("discord.js");
+const { Client, GatewayIntentBits, Collection } = require("discord.js");
+const fs = require("fs");
+const path = require("path");
 
 const client = new Client({
   intents: [
@@ -8,25 +10,29 @@ const client = new Client({
   ]
 });
 
-client.on("ready", () => {
-  console.log(`Logged in as ${client.user.tag}`);
+// Command collection
+client.commands = new Collection();
 
-  // Custom bot status
-  client.user.setPresence({
-    activities: [
-      {
-        name: "🎃👻Olgafy: Coming Soon ",
-        type: ActivityType.Playing
-      }
-    ],
-    status: "online"
-  });
-});
+// Load commands
+const commandsPath = path.join(__dirname, "commands");
+const commandFiles = fs.readdirSync(commandsPath).filter(f => f.endsWith(".js"));
 
-client.on("messageCreate", (msg) => {
-  if (msg.content === "!ping") {
-    msg.reply("pong");
+for (const file of commandFiles) {
+  const command = require(`./commands/${file}`);
+  client.commands.set(command.data.name, command);
+}
+
+// Load events
+const eventsPath = path.join(__dirname, "events");
+const eventFiles = fs.readdirSync(eventsPath).filter(f => f.endsWith(".js"));
+
+for (const file of eventFiles) {
+  const event = require(`./events/${file}`);
+  if (event.once) {
+    client.once(event.name, (...args) => event.execute(...args, client));
+  } else {
+    client.on(event.name, (...args) => event.execute(...args, client));
   }
-});
+}
 
 client.login(process.env.TOKEN);

@@ -17,3 +17,4 @@ setInterval(() => {
   fetch("https://olgaistic-services.onrender.com/")
     .catch(() => {});
 }, 120000);
+ 

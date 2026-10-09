@@ -3,8 +3,7 @@ const {
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
-  ActionRowBuilder,
-  EmbedBuilder
+  ActionRowBuilder
 } = require("discord.js");
 
 module.exports = {
@@ -32,42 +31,42 @@ module.exports = {
       .setCustomId("embed_create_modal")
       .setTitle("Create Custom Embed");
 
-    const titleInput = new TextInputBuilder()
-      .setCustomId("embed_title")
-      .setLabel("Title (optional)")
-      .setStyle(TextInputStyle.Short)
-      .setRequired(false);
-
-    const descInput = new TextInputBuilder()
-      .setCustomId("embed_desc")
-      .setLabel("Description (required)")
-      .setStyle(TextInputStyle.Paragraph)
-      .setRequired(true);
-
-    const colorInput = new TextInputBuilder()
-      .setCustomId("embed_color")
-      .setLabel("Color HEX (optional)")
-      .setStyle(TextInputStyle.Short)
-      .setRequired(false);
-
-    const imageInput = new TextInputBuilder()
-      .setCustomId("embed_image")
-      .setLabel("Image URL (optional)")
-      .setStyle(TextInputStyle.Short)
-      .setRequired(false);
-
-    const thumbInput = new TextInputBuilder()
-      .setCustomId("embed_thumb")
-      .setLabel("Thumbnail URL (optional)")
-      .setStyle(TextInputStyle.Short)
-      .setRequired(false);
-
     modal.addComponents(
-      new ActionRowBuilder().addComponents(titleInput),
-      new ActionRowBuilder().addComponents(descInput),
-      new ActionRowBuilder().addComponents(colorInput),
-      new ActionRowBuilder().addComponents(imageInput),
-      new ActionRowBuilder().addComponents(thumbInput)
+      new ActionRowBuilder().addComponents(
+        new TextInputBuilder()
+          .setCustomId("embed_title")
+          .setLabel("Title (optional)")
+          .setStyle(TextInputStyle.Short)
+          .setRequired(false)
+      ),
+      new ActionRowBuilder().addComponents(
+        new TextInputBuilder()
+          .setCustomId("embed_desc")
+          .setLabel("Description (required)")
+          .setStyle(TextInputStyle.Paragraph)
+          .setRequired(true)
+      ),
+      new ActionRowBuilder().addComponents(
+        new TextInputBuilder()
+          .setCustomId("embed_color")
+          .setLabel("Color HEX (optional)")
+          .setStyle(TextInputStyle.Short)
+          .setRequired(false)
+      ),
+      new ActionRowBuilder().addComponents(
+        new TextInputBuilder()
+          .setCustomId("embed_image")
+          .setLabel("Image URL (optional)")
+          .setStyle(TextInputStyle.Short)
+          .setRequired(false)
+      ),
+      new ActionRowBuilder().addComponents(
+        new TextInputBuilder()
+          .setCustomId("embed_thumb")
+          .setLabel("Thumbnail URL (optional)")
+          .setStyle(TextInputStyle.Short)
+          .setRequired(false)
+      )
     );
 
     await interaction.showModal(modal);

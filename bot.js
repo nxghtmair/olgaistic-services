@@ -10,7 +10,6 @@ const client = new Client({
   ]
 });
 
-// Command collection
 client.commands = new Collection();
 
 // Load commands

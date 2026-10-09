@@ -9,7 +9,6 @@ module.exports = {
       status: "online"
     });
 
-    // REGISTER SLASH COMMANDS
     await client.application.commands.set(
       client.commands.map(cmd => cmd.data)
     );

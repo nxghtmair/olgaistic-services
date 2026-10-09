@@ -12,9 +12,7 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// Ping Render every 2 minutes
 setInterval(() => {
-  fetch("https://olgaistic-services.onrender.com")
-    .then(() => console.log("Keep-alive ping sent"))
-    .catch(err => console.error("Ping failed:", err));
+  fetch("https://olgaistic-services.onrender.com/")
+    .catch(() => {});
 }, 2 * 60 * 1000);

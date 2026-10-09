@@ -42,7 +42,7 @@ module.exports = {
     client.user.setActivity(activity, { type: ActivityType.Playing });
 
     await interaction.reply({
-      content: `Bot status updated.`,
+      content: "Bot status updated.",
       ephemeral: true
     });
   }

@@ -4,7 +4,8 @@ const {
   ButtonStyle 
 } = require("discord.js");
 
-const { createCanvas, loadImage } = require("canvas");
+const PImage = require("pureimage");
+const fs = require("fs");
 
 module.exports = {
   name: "interactionCreate",
@@ -62,25 +63,31 @@ module.exports = {
         interaction.user.username;
 
       // Load template image
-      const template = await loadImage("./assets/24template.png");
+      const imgPath = "./assets/24template.png";
+      const img = await PImage.decodePNGFromStream(fs.createReadStream(imgPath));
 
-      const canvas = createCanvas(template.width, template.height);
+      const canvas = PImage.make(img.width, img.height);
       const ctx = canvas.getContext("2d");
 
       // Draw template
-      ctx.drawImage(template, 0, 0);
+      ctx.drawImage(img, 0, 0, img.width, img.height);
 
-      // White rectangle coordinates (adjust if needed)
+      // White rectangle coordinates
       const boxX = 150;
       const boxY = 150;
       const boxW = 900;
       const boxH = 500;
 
       // Text settings
+      const font = PImage.registerFont(
+        "./assets/arial.ttf", // optional custom font
+        "Arial"
+      );
+      font.loadSync();
+
       ctx.fillStyle = "#000000";
-      ctx.font = "40px Arial"; // medium size
+      ctx.font = "40px Arial";
       ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
 
       // Wrap text
       const words = desc.split(" ");
@@ -110,8 +117,9 @@ module.exports = {
         startY += lineHeight;
       }
 
-      // Convert canvas to buffer
-      const finalImage = canvas.toBuffer();
+      // Save final image to buffer
+      const outPath = "./assets/output.png";
+      await PImage.encodePNGToStream(canvas, fs.createWriteStream(outPath));
 
       // Build embed
       const embed = new EmbedBuilder()
@@ -140,7 +148,7 @@ module.exports = {
         components: [announcerComponent],
         files: [
           {
-            attachment: finalImage,
+            attachment: outPath,
             name: "announcement.png"
           }
         ]

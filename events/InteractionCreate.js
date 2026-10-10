@@ -1,4 +1,10 @@
-const { EmbedBuilder, ComponentType, ButtonStyle } = require("discord.js");
+const { 
+  EmbedBuilder, 
+  ComponentType, 
+  ButtonStyle 
+} = require("discord.js");
+
+const { createCanvas, loadImage } = require("canvas");
 
 module.exports = {
   name: "interactionCreate",
@@ -55,12 +61,64 @@ module.exports = {
         interaction.member.nickname ||
         interaction.user.username;
 
+      // Load template image
+      const template = await loadImage("./assets/24template.png");
+
+      const canvas = createCanvas(template.width, template.height);
+      const ctx = canvas.getContext("2d");
+
+      // Draw template
+      ctx.drawImage(template, 0, 0);
+
+      // White rectangle coordinates (adjust if needed)
+      const boxX = 150;
+      const boxY = 150;
+      const boxW = 900;
+      const boxH = 500;
+
+      // Text settings
+      ctx.fillStyle = "#000000";
+      ctx.font = "40px Arial"; // medium size
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      // Wrap text
+      const words = desc.split(" ");
+      let lines = [];
+      let currentLine = "";
+
+      for (let word of words) {
+        const testLine = currentLine + word + " ";
+        const metrics = ctx.measureText(testLine);
+
+        if (metrics.width > boxW - 40) {
+          lines.push(currentLine);
+          currentLine = word + " ";
+        } else {
+          currentLine = testLine;
+        }
+      }
+      lines.push(currentLine);
+
+      // Draw wrapped text centered vertically
+      const lineHeight = 50;
+      const totalHeight = lines.length * lineHeight;
+      let startY = boxY + (boxH - totalHeight) / 2;
+
+      for (let line of lines) {
+        ctx.fillText(line.trim(), boxX + boxW / 2, startY);
+        startY += lineHeight;
+      }
+
+      // Convert canvas to buffer
+      const finalImage = canvas.toBuffer();
+
+      // Build embed
       const embed = new EmbedBuilder()
         .setTitle("🗨️ 24 Announcement")
-        .setDescription(desc)
-        .setColor("#0A5CFF") // azurite blue
+        .setColor("#0A5CFF")
         .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" })
-        .setImage("https://cdn.discordapp.com/attachments/1212370536416677949/1558523793025015808/image.png?ex=6acbbfe4&is=6aca6e64&hm=15c1635e8bb4d76f866fb6151800d287686cefc401ce9581c2759dba9e2069a7&");
+        .setImage("attachment://announcement.png");
 
       const announcerComponent = {
         type: ComponentType.ActionRow,
@@ -79,7 +137,13 @@ module.exports = {
 
       await channel.send({
         embeds: [embed],
-        components: [announcerComponent]
+        components: [announcerComponent],
+        files: [
+          {
+            attachment: finalImage,
+            name: "announcement.png"
+          }
+        ]
       });
 
       return interaction.reply({

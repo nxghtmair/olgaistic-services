@@ -161,7 +161,7 @@ module.exports = {
     }
 
     // ─────────────────────────────────────────────
-    // 24 ANNOUNCEMENT
+    // 24 ANNOUNCEMENT — FIXED BUTTON
     // ─────────────────────────────────────────────
     if (interaction.isModalSubmit() && interaction.customId === "24_announce_modal") {
       const desc = interaction.fields.getTextInputValue("24_desc");
@@ -181,7 +181,8 @@ module.exports = {
         type: ComponentType.ActionRow,
         components: [
           {
-            type: ButtonStyle.Secondary,
+            type: ComponentType.Button,
+            style: ButtonStyle.Secondary,
             label: `🗨️ Announcer: ${nickname}`,
             custom_id: "announcer_display",
             disabled: true
@@ -248,7 +249,8 @@ module.exports = {
         type: ComponentType.ActionRow,
         components: [
           {
-            type: ButtonStyle.Secondary,
+            type: ComponentType.Button,
+            style: ButtonStyle.Secondary,
             label: `✬ Confesser: ${confesserName} ✬`,
             custom_id: "confesser_display",
             disabled: true

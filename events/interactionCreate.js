@@ -161,7 +161,7 @@ module.exports = {
     }
 
     // ─────────────────────────────────────────────
-    // 24 ANNOUNCEMENT — FIXED BUTTON
+    // 24 ANNOUNCEMENT — JIMP IMAGE GENERATION
     // ─────────────────────────────────────────────
     if (interaction.isModalSubmit() && interaction.customId === "24_announce_modal") {
       const desc = interaction.fields.getTextInputValue("24_desc");
@@ -170,12 +170,44 @@ module.exports = {
         interaction.member?.nickname ||
         interaction.user.username;
 
+      const Jimp = require("jimp");
+
+      // Load template
+      const template = await Jimp.read("./assets/24template.png");
+
+      // White rectangle coordinates (based on your PNG)
+      const boxX = 150;
+      const boxY = 150;
+      const boxW = 900;
+      const boxH = 500;
+
+      // Load font
+      const font = await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK);
+
+      // Draw wrapped text inside the rectangle
+      template.print(
+        font,
+        boxX,
+        boxY,
+        {
+          text: desc,
+          alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
+          alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE
+        },
+        boxW,
+        boxH
+      );
+
+      // Save output
+      const outPath = "./assets/24output.png";
+      await template.writeAsync(outPath);
+
+      // Build embed
       const embed = new EmbedBuilder()
         .setTitle("↳ ❝ [24' News] ¡! ❞")
-        .setDescription(desc)
         .setColor("#0A5CFF")
         .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" })
-        .setImage("https://cdn.discordapp.com/attachments/1212370536416677949/1558523793025015808/image.png");
+        .setImage("attachment://24output.png");
 
       const announcerComponent = {
         type: ComponentType.ActionRow,
@@ -194,7 +226,13 @@ module.exports = {
 
       await channel.send({
         embeds: [embed],
-        components: [announcerComponent]
+        components: [announcerComponent],
+        files: [
+          {
+            attachment: outPath,
+            name: "24output.png"
+          }
+        ]
       });
 
       return interaction.reply({

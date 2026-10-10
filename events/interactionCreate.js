@@ -32,130 +32,80 @@ module.exports = {
     }
 
     // ─────────────────────────────────────────────
-    // EMBED CREATOR — MODAL 1 (Embeds 1 & 2)
+    // EMBED CREATE — SINGLE EMBED
     // ─────────────────────────────────────────────
-    if (interaction.isModalSubmit() && interaction.customId === "embed_modal_1") {
+    if (interaction.isModalSubmit() && interaction.customId === "embed_create_modal") {
+      const title = interaction.fields.getTextInputValue("title");
+      const desc = interaction.fields.getTextInputValue("desc");
+      const image = interaction.fields.getTextInputValue("image");
+      const thumb = interaction.fields.getTextInputValue("thumb");
 
-      client.embedTemp = {
-        title_1: interaction.fields.getTextInputValue("title_1"),
-        desc_1: interaction.fields.getTextInputValue("desc_1"),
-        title_2: interaction.fields.getTextInputValue("title_2"),
-        desc_2: interaction.fields.getTextInputValue("desc_2")
-      };
+      const embed = new EmbedBuilder()
+        .setColor("#0A5CFF")
+        .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" });
 
-      const modal = new ModalBuilder()
-        .setCustomId("embed_modal_2")
-        .setTitle("Embeds 3 & 4");
+      if (title) embed.setTitle(title);
+      if (desc) embed.setDescription(desc);
+      if (image) embed.setImage(image);
+      if (thumb) embed.setThumbnail(thumb);
 
-      const fields = [
-        new TextInputBuilder()
-          .setCustomId("title_3")
-          .setLabel("Title for Embed 3")
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false),
+      await interaction.channel.send({ embeds: [embed] });
 
-        new TextInputBuilder()
-          .setCustomId("desc_3")
-          .setLabel("Description for Embed 3")
-          .setStyle(TextInputStyle.Paragraph)
-          .setRequired(false),
-
-        new TextInputBuilder()
-          .setCustomId("title_4")
-          .setLabel("Title for Embed 4")
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false),
-
-        new TextInputBuilder()
-          .setCustomId("desc_4")
-          .setLabel("Description for Embed 4")
-          .setStyle(TextInputStyle.Paragraph)
-          .setRequired(false)
-      ];
-
-      modal.addComponents(
-        new ActionRowBuilder().addComponents(fields[0]),
-        new ActionRowBuilder().addComponents(fields[1]),
-        new ActionRowBuilder().addComponents(fields[2]),
-        new ActionRowBuilder().addComponents(fields[3])
-      );
-
-      return interaction.showModal(modal);
+      return interaction.reply({
+        content: "✔ Embed created.",
+        ephemeral: true
+      });
     }
 
     // ─────────────────────────────────────────────
-    // EMBED CREATOR — MODAL 2 (Embeds 3 & 4)
+    // EMBED ADDON — ADD 2 EMBEDS TO EXISTING MESSAGE
     // ─────────────────────────────────────────────
-    if (interaction.isModalSubmit() && interaction.customId === "embed_modal_2") {
+    if (interaction.isModalSubmit() && interaction.customId.startsWith("embed_addon_modal_")) {
+      const msgId = interaction.customId.replace("embed_addon_modal_", "");
 
-      client.embedTemp.title_3 = interaction.fields.getTextInputValue("title_3");
-      client.embedTemp.desc_3 = interaction.fields.getTextInputValue("desc_3");
-      client.embedTemp.title_4 = interaction.fields.getTextInputValue("title_4");
-      client.embedTemp.desc_4 = interaction.fields.getTextInputValue("desc_4");
+      const title1 = interaction.fields.getTextInputValue("title_1");
+      const desc1 = interaction.fields.getTextInputValue("desc_1");
+      const title2 = interaction.fields.getTextInputValue("title_2");
+      const desc2 = interaction.fields.getTextInputValue("desc_2");
 
-      const modal = new ModalBuilder()
-        .setCustomId("embed_modal_3")
-        .setTitle("Embed 5");
+      const channel = interaction.channel;
+      const msg = await channel.messages.fetch(msgId).catch(() => null);
 
-      const fields = [
-        new TextInputBuilder()
-          .setCustomId("title_5")
-          .setLabel("Title for Embed 5")
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false),
-
-        new TextInputBuilder()
-          .setCustomId("desc_5")
-          .setLabel("Description for Embed 5")
-          .setStyle(TextInputStyle.Paragraph)
-          .setRequired(false)
-      ];
-
-      modal.addComponents(
-        new ActionRowBuilder().addComponents(fields[0]),
-        new ActionRowBuilder().addComponents(fields[1])
-      );
-
-      return interaction.showModal(modal);
-    }
-
-    // ─────────────────────────────────────────────
-    // EMBED CREATOR — MODAL 3 (Embed 5)
-    // ─────────────────────────────────────────────
-    if (interaction.isModalSubmit() && interaction.customId === "embed_modal_3") {
-
-      client.embedTemp.title_5 = interaction.fields.getTextInputValue("title_5");
-      client.embedTemp.desc_5 = interaction.fields.getTextInputValue("desc_5");
-
-      const embeds = [];
-
-      for (let i = 1; i <= 5; i++) {
-        const title = client.embedTemp[`title_${i}`];
-        const desc = client.embedTemp[`desc_${i}`];
-
-        if (!title && !desc) continue;
-
-        const embed = new EmbedBuilder()
-          .setColor("#0A5CFF")
-          .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" });
-
-        if (title) embed.setTitle(title);
-        if (desc) embed.setDescription(desc);
-
-        embeds.push(embed);
-      }
-
-      if (embeds.length === 0) {
+      if (!msg) {
         return interaction.reply({
-          content: "❌ You didn't fill out any embed fields.",
+          content: "❌ Message not found.",
           ephemeral: true
         });
       }
 
-      await interaction.channel.send({ embeds });
+      const newEmbeds = [...msg.embeds];
+
+      if (title1 || desc1) {
+        const e1 = new EmbedBuilder()
+          .setColor("#0A5CFF")
+          .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" });
+
+        if (title1) e1.setTitle(title1);
+        if (desc1) e1.setDescription(desc1);
+
+        newEmbeds.push(e1);
+      }
+
+      if (title2 || desc2) {
+        const e2 = new EmbedBuilder()
+          .setColor("#0A5CFF")
+          .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" });
+
+        if (title2) e2.setTitle(title2);
+        if (desc2) e2.setDescription(desc2);
+
+        newEmbeds.push(e2);
+      }
+
+      await msg.edit({ embeds: newEmbeds });
 
       return interaction.reply({
-        content: `✔ Sent ${embeds.length} embed(s).`,
+        content: "✔ Added embeds.",
         ephemeral: true
       });
     }
@@ -172,19 +122,15 @@ module.exports = {
 
       const Jimp = require("jimp");
 
-      // Load template
       const template = await Jimp.read("./assets/24template.png");
 
-      // White rectangle coordinates (based on your PNG)
       const boxX = 150;
       const boxY = 150;
       const boxW = 900;
       const boxH = 500;
 
-      // Load font
       const font = await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK);
 
-      // Draw wrapped text inside the rectangle
       template.print(
         font,
         boxX,
@@ -198,11 +144,9 @@ module.exports = {
         boxH
       );
 
-      // Save output
       const outPath = "./assets/24output.png";
       await template.writeAsync(outPath);
 
-      // Build embed
       const embed = new EmbedBuilder()
         .setTitle("↳ ❝ [24' News] ¡! ❞")
         .setColor("#0A5CFF")
@@ -236,7 +180,7 @@ module.exports = {
       });
 
       return interaction.reply({
-        content: "Announcement sent.",
+        content: "✔ Announcement sent.",
         ephemeral: true
       });
     }

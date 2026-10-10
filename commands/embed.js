@@ -1,3 +1,4 @@
+// commands/embed.js
 const {
   SlashCommandBuilder,
   ModalBuilder,
@@ -9,41 +10,41 @@ const {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("embed")
-    .setDescription("Create up to 5 embeds")
+    .setDescription("Embed tools")
     .addSubcommand(sub =>
       sub
         .setName("create")
-        .setDescription("Create multiple embeds")
+        .setDescription("Create a single embed")
     ),
 
   async execute(interaction) {
     const modal = new ModalBuilder()
-      .setCustomId("embed_modal_1")
-      .setTitle("Embeds 1 & 2");
+      .setCustomId("embed_create_modal")
+      .setTitle("Create Embed");
 
     const fields = [
       new TextInputBuilder()
-        .setCustomId("title_1")
-        .setLabel("Title for Embed 1")
+        .setCustomId("title")
+        .setLabel("Title")
         .setStyle(TextInputStyle.Short)
         .setRequired(false),
 
       new TextInputBuilder()
-        .setCustomId("desc_1")
-        .setLabel("Description for Embed 1")
+        .setCustomId("desc")
+        .setLabel("Description")
         .setStyle(TextInputStyle.Paragraph)
         .setRequired(false),
 
       new TextInputBuilder()
-        .setCustomId("title_2")
-        .setLabel("Title for Embed 2")
+        .setCustomId("image")
+        .setLabel("Image URL")
         .setStyle(TextInputStyle.Short)
         .setRequired(false),
 
       new TextInputBuilder()
-        .setCustomId("desc_2")
-        .setLabel("Description for Embed 2")
-        .setStyle(TextInputStyle.Paragraph)
+        .setCustomId("thumb")
+        .setLabel("Thumbnail URL")
+        .setStyle(TextInputStyle.Short)
         .setRequired(false)
     ];
 

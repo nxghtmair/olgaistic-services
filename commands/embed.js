@@ -9,64 +9,49 @@ const {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("embed")
-    .setDescription("embed creator")
+    .setDescription("Create up to 5 embeds")
     .addSubcommand(sub =>
       sub
         .setName("create")
-        .setDescription("create a custom embed")
+        .setDescription("Create multiple embeds")
     ),
 
   async execute(interaction) {
-    if (interaction.options.getSubcommand() !== "create") return;
-
-    const requiredRole = "1558060223548231712";
-    if (!interaction.member.roles.cache.has(requiredRole)) {
-      return interaction.reply({
-        content: "u dont have enough perms, bitch.",
-        ephemeral: true
-      });
-    }
-
     const modal = new ModalBuilder()
-      .setCustomId("embed_create_modal")
-      .setTitle("Create Custom Embed");
+      .setCustomId("embed_modal_1")
+      .setTitle("Embeds 1 & 2");
+
+    const fields = [
+      new TextInputBuilder()
+        .setCustomId("title_1")
+        .setLabel("Title for Embed 1")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(false),
+
+      new TextInputBuilder()
+        .setCustomId("desc_1")
+        .setLabel("Description for Embed 1")
+        .setStyle(TextInputStyle.Paragraph)
+        .setRequired(false),
+
+      new TextInputBuilder()
+        .setCustomId("title_2")
+        .setLabel("Title for Embed 2")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(false),
+
+      new TextInputBuilder()
+        .setCustomId("desc_2")
+        .setLabel("Description for Embed 2")
+        .setStyle(TextInputStyle.Paragraph)
+        .setRequired(false)
+    ];
 
     modal.addComponents(
-      new ActionRowBuilder().addComponents(
-        new TextInputBuilder()
-          .setCustomId("embed_title")
-          .setLabel("Title (optional)")
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false)
-      ),
-      new ActionRowBuilder().addComponents(
-        new TextInputBuilder()
-          .setCustomId("embed_desc")
-          .setLabel("Description (required)")
-          .setStyle(TextInputStyle.Paragraph)
-          .setRequired(true)
-      ),
-      new ActionRowBuilder().addComponents(
-        new TextInputBuilder()
-          .setCustomId("embed_color")
-          .setLabel("Color HEX (optional)")
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false)
-      ),
-      new ActionRowBuilder().addComponents(
-        new TextInputBuilder()
-          .setCustomId("embed_image")
-          .setLabel("Image URL (optional)")
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false)
-      ),
-      new ActionRowBuilder().addComponents(
-        new TextInputBuilder()
-          .setCustomId("embed_thumb")
-          .setLabel("Thumbnail URL (optional)")
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false)
-      )
+      new ActionRowBuilder().addComponents(fields[0]),
+      new ActionRowBuilder().addComponents(fields[1]),
+      new ActionRowBuilder().addComponents(fields[2]),
+      new ActionRowBuilder().addComponents(fields[3])
     );
 
     await interaction.showModal(modal);

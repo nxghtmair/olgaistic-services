@@ -1,7 +1,11 @@
 const {
   EmbedBuilder,
   ComponentType,
-  ButtonStyle
+  ButtonStyle,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  ActionRowBuilder
 } = require("discord.js");
 
 const fs = require("fs");
@@ -27,38 +31,143 @@ module.exports = {
       return stickyRR.handleButton(interaction);
     }
 
-    // Embed creator modal
-    if (interaction.isModalSubmit() && interaction.customId === "embed_create_modal") {
-      const title = interaction.fields.getTextInputValue("embed_title");
-      const desc = interaction.fields.getTextInputValue("embed_desc");
-      const color = interaction.fields.getTextInputValue("embed_color");
-      const image = interaction.fields.getTextInputValue("embed_image");
-      const thumb = interaction.fields.getTextInputValue("embed_thumb");
+    // ─────────────────────────────────────────────
+    // EMBED CREATOR — MODAL 1 (Embeds 1 & 2)
+    // ─────────────────────────────────────────────
+    if (interaction.isModalSubmit() && interaction.customId === "embed_modal_1") {
 
-      const embed = new EmbedBuilder()
-        .setDescription(desc)
-        .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" });
+      client.embedTemp = {
+        title_1: interaction.fields.getTextInputValue("title_1"),
+        desc_1: interaction.fields.getTextInputValue("desc_1"),
+        title_2: interaction.fields.getTextInputValue("title_2"),
+        desc_2: interaction.fields.getTextInputValue("desc_2")
+      };
 
-      if (title) embed.setTitle(title);
-      if (color) embed.setColor(color);
-      else embed.setColor("#3498db");
-      if (image) embed.setImage(image);
-      if (thumb) embed.setThumbnail(thumb);
+      const modal = new ModalBuilder()
+        .setCustomId("embed_modal_2")
+        .setTitle("Embeds 3 & 4");
 
-      await interaction.channel.send({ embeds: [embed] });
+      const fields = [
+        new TextInputBuilder()
+          .setCustomId("title_3")
+          .setLabel("Title for Embed 3")
+          .setStyle(TextInputStyle.Short)
+          .setRequired(false),
+
+        new TextInputBuilder()
+          .setCustomId("desc_3")
+          .setLabel("Description for Embed 3")
+          .setStyle(TextInputStyle.Paragraph)
+          .setRequired(false),
+
+        new TextInputBuilder()
+          .setCustomId("title_4")
+          .setLabel("Title for Embed 4")
+          .setStyle(TextInputStyle.Short)
+          .setRequired(false),
+
+        new TextInputBuilder()
+          .setCustomId("desc_4")
+          .setLabel("Description for Embed 4")
+          .setStyle(TextInputStyle.Paragraph)
+          .setRequired(false)
+      ];
+
+      modal.addComponents(
+        new ActionRowBuilder().addComponents(fields[0]),
+        new ActionRowBuilder().addComponents(fields[1]),
+        new ActionRowBuilder().addComponents(fields[2]),
+        new ActionRowBuilder().addComponents(fields[3])
+      );
+
+      return interaction.showModal(modal);
+    }
+
+    // ─────────────────────────────────────────────
+    // EMBED CREATOR — MODAL 2 (Embeds 3 & 4)
+    // ─────────────────────────────────────────────
+    if (interaction.isModalSubmit() && interaction.customId === "embed_modal_2") {
+
+      client.embedTemp.title_3 = interaction.fields.getTextInputValue("title_3");
+      client.embedTemp.desc_3 = interaction.fields.getTextInputValue("desc_3");
+      client.embedTemp.title_4 = interaction.fields.getTextInputValue("title_4");
+      client.embedTemp.desc_4 = interaction.fields.getTextInputValue("desc_4");
+
+      const modal = new ModalBuilder()
+        .setCustomId("embed_modal_3")
+        .setTitle("Embed 5");
+
+      const fields = [
+        new TextInputBuilder()
+          .setCustomId("title_5")
+          .setLabel("Title for Embed 5")
+          .setStyle(TextInputStyle.Short)
+          .setRequired(false),
+
+        new TextInputBuilder()
+          .setCustomId("desc_5")
+          .setLabel("Description for Embed 5")
+          .setStyle(TextInputStyle.Paragraph)
+          .setRequired(false)
+      ];
+
+      modal.addComponents(
+        new ActionRowBuilder().addComponents(fields[0]),
+        new ActionRowBuilder().addComponents(fields[1])
+      );
+
+      return interaction.showModal(modal);
+    }
+
+    // ─────────────────────────────────────────────
+    // EMBED CREATOR — MODAL 3 (Embed 5)
+    // ─────────────────────────────────────────────
+    if (interaction.isModalSubmit() && interaction.customId === "embed_modal_3") {
+
+      client.embedTemp.title_5 = interaction.fields.getTextInputValue("title_5");
+      client.embedTemp.desc_5 = interaction.fields.getTextInputValue("desc_5");
+
+      const embeds = [];
+
+      for (let i = 1; i <= 5; i++) {
+        const title = client.embedTemp[`title_${i}`];
+        const desc = client.embedTemp[`desc_${i}`];
+
+        if (!title && !desc) continue;
+
+        const embed = new EmbedBuilder()
+          .setColor("#0A5CFF")
+          .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" });
+
+        if (title) embed.setTitle(title);
+        if (desc) embed.setDescription(desc);
+
+        embeds.push(embed);
+      }
+
+      if (embeds.length === 0) {
+        return interaction.reply({
+          content: "❌ You didn't fill out any embed fields.",
+          ephemeral: true
+        });
+      }
+
+      await interaction.channel.send({ embeds });
 
       return interaction.reply({
-        content: "✔ embed sent",
+        content: `✔ Sent ${embeds.length} embed(s).`,
         ephemeral: true
       });
     }
 
-    // 24 ANNOUNCEMENT — SIMPLE VERSION (NO PUREIMAGE)
+    // ─────────────────────────────────────────────
+    // 24 ANNOUNCEMENT
+    // ─────────────────────────────────────────────
     if (interaction.isModalSubmit() && interaction.customId === "24_announce_modal") {
       const desc = interaction.fields.getTextInputValue("24_desc");
 
       const nickname =
-        interaction.member.nickname ||
+        interaction.member?.nickname ||
         interaction.user.username;
 
       const embed = new EmbedBuilder()
@@ -72,9 +181,8 @@ module.exports = {
         type: ComponentType.ActionRow,
         components: [
           {
-            type: ComponentType.Button,
+            type: ButtonStyle.Secondary,
             label: `🗨️ Announcer: ${nickname}`,
-            style: ButtonStyle.Secondary,
             custom_id: "announcer_display",
             disabled: true
           }
@@ -94,12 +202,13 @@ module.exports = {
       });
     }
 
+    // ─────────────────────────────────────────────
     // CONFESSION SYSTEM
+    // ─────────────────────────────────────────────
     if (interaction.isModalSubmit() && interaction.customId.startsWith("confession_modal_")) {
       const confessionText = interaction.fields.getTextInputValue("confession_text");
       const type = interaction.customId.replace("confession_modal_", "");
 
-      // DM user
       try {
         await interaction.user.send({
           embeds: [
@@ -110,9 +219,8 @@ module.exports = {
               .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" })
           ]
         });
-      } catch (err) {}
+      } catch {}
 
-      // Counter
       const counterPath = "./confessionCounter.json";
       if (!fs.existsSync(counterPath)) {
         fs.writeFileSync(counterPath, JSON.stringify({ count: 0 }, null, 2));
@@ -124,17 +232,11 @@ module.exports = {
 
       const confessionNumber = data.count;
 
-      // Confesser name
-      let confesserName;
-      if (type === "anonymous") {
-        confesserName = "Anonymous";
-      } else {
-        confesserName =
-          interaction.member.nickname ||
-          interaction.user.username;
-      }
+      let confesserName =
+        type === "anonymous"
+          ? "Anonymous"
+          : interaction.member?.nickname || interaction.user.username;
 
-      // Confession embed
       const embed = new EmbedBuilder()
         .setTitle(`. . . ⇢ ˗ˏˋ [Confession No. ${confessionNumber}] ࿐ྂ`)
         .setDescription(confessionText)
@@ -146,9 +248,8 @@ module.exports = {
         type: ComponentType.ActionRow,
         components: [
           {
-            type: ComponentType.Button,
+            type: ButtonStyle.Secondary,
             label: `✬ Confesser: ${confesserName} ✬`,
-            style: ButtonStyle.Secondary,
             custom_id: "confesser_display",
             disabled: true
           }

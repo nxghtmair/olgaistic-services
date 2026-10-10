@@ -1,3 +1,4 @@
+// commands/confession.js
 const {
   SlashCommandBuilder,
   ModalBuilder,
@@ -8,21 +9,16 @@ const {
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("suggestion")
-    .setDescription("Confession system")
-    .addSubcommand(sub =>
-      sub
-        .setName("create")
-        .setDescription("Create a confession")
-        .addStringOption(opt =>
-          opt
-            .setName("type")
-            .setDescription("anonymous or public")
-            .setRequired(true)
-            .addChoices(
-              { name: "anonymous", value: "anonymous" },
-              { name: "public", value: "public" }
-            )
+    .setName("confession")
+    .setDescription("Create a confession")
+    .addStringOption(opt =>
+      opt
+        .setName("type")
+        .setDescription("anonymous or public")
+        .setRequired(true)
+        .addChoices(
+          { name: "anonymous", value: "anonymous" },
+          { name: "public", value: "public" }
         )
     ),
 

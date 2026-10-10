@@ -1,10 +1,9 @@
-const { 
-  EmbedBuilder, 
-  ComponentType, 
-  ButtonStyle 
+const {
+  EmbedBuilder,
+  ComponentType,
+  ButtonStyle
 } = require("discord.js");
 
-const PImage = require("pureimage");
 const fs = require("fs");
 
 module.exports = {
@@ -54,7 +53,7 @@ module.exports = {
       });
     }
 
-    // 24 announce modal
+    // 24 ANNOUNCEMENT — SIMPLE VERSION (NO PUREIMAGE)
     if (interaction.isModalSubmit() && interaction.customId === "24_announce_modal") {
       const desc = interaction.fields.getTextInputValue("24_desc");
 
@@ -62,78 +61,19 @@ module.exports = {
         interaction.member.nickname ||
         interaction.user.username;
 
-      // Load template image
-      const imgPath = "./assets/24template.png";
-      const img = await PImage.decodePNGFromStream(fs.createReadStream(imgPath));
-
-      const canvas = PImage.make(img.width, img.height);
-      const ctx = canvas.getContext("2d");
-
-      // Draw template
-      ctx.drawImage(img, 0, 0, img.width, img.height);
-
-      // White rectangle coordinates
-      const boxX = 150;
-      const boxY = 150;
-      const boxW = 900;
-      const boxH = 500;
-
-      // Text settings
-      const font = PImage.registerFont(
-        "./assets/arial.ttf", // optional custom font
-        "Arial"
-      );
-      font.loadSync();
-
-      ctx.fillStyle = "#000000";
-      ctx.font = "40px Arial";
-      ctx.textAlign = "center";
-
-      // Wrap text
-      const words = desc.split(" ");
-      let lines = [];
-      let currentLine = "";
-
-      for (let word of words) {
-        const testLine = currentLine + word + " ";
-        const metrics = ctx.measureText(testLine);
-
-        if (metrics.width > boxW - 40) {
-          lines.push(currentLine);
-          currentLine = word + " ";
-        } else {
-          currentLine = testLine;
-        }
-      }
-      lines.push(currentLine);
-
-      // Draw wrapped text centered vertically
-      const lineHeight = 50;
-      const totalHeight = lines.length * lineHeight;
-      let startY = boxY + (boxH - totalHeight) / 2;
-
-      for (let line of lines) {
-        ctx.fillText(line.trim(), boxX + boxW / 2, startY);
-        startY += lineHeight;
-      }
-
-      // Save final image to buffer
-      const outPath = "./assets/output.png";
-      await PImage.encodePNGToStream(canvas, fs.createWriteStream(outPath));
-
-      // Build embed
       const embed = new EmbedBuilder()
-        .setTitle("🗨️ 24 Announcement")
+        .setTitle("↳ ❝ [24' News] ¡! ❞")
+        .setDescription(desc)
         .setColor("#0A5CFF")
         .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" })
-        .setImage("attachment://announcement.png");
+        .setImage("https://cdn.discordapp.com/attachments/1212370536416677949/1558523793025015808/image.png");
 
       const announcerComponent = {
         type: ComponentType.ActionRow,
         components: [
           {
             type: ComponentType.Button,
-            label: `🗨️Announcer: ${nickname}`,
+            label: `🗨️ Announcer: ${nickname}`,
             style: ButtonStyle.Secondary,
             custom_id: "announcer_display",
             disabled: true
@@ -145,17 +85,90 @@ module.exports = {
 
       await channel.send({
         embeds: [embed],
-        components: [announcerComponent],
-        files: [
-          {
-            attachment: outPath,
-            name: "announcement.png"
-          }
-        ]
+        components: [announcerComponent]
       });
 
       return interaction.reply({
         content: "Announcement sent.",
+        ephemeral: true
+      });
+    }
+
+    // CONFESSION SYSTEM
+    if (interaction.isModalSubmit() && interaction.customId.startsWith("confession_modal_")) {
+      const confessionText = interaction.fields.getTextInputValue("confession_text");
+      const type = interaction.customId.replace("confession_modal_", "");
+
+      // DM user
+      try {
+        await interaction.user.send({
+          embeds: [
+            new EmbedBuilder()
+              .setTitle("❍⌇─➭ Confessions ﹀﹀ ︵↷")
+              .setDescription("hey bitch, thanks for using our confessions system. u can start spilling, whore.")
+              .setColor("#0A5CFF")
+              .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" })
+          ]
+        });
+      } catch (err) {}
+
+      // Counter
+      const counterPath = "./confessionCounter.json";
+      if (!fs.existsSync(counterPath)) {
+        fs.writeFileSync(counterPath, JSON.stringify({ count: 0 }, null, 2));
+      }
+
+      let data = JSON.parse(fs.readFileSync(counterPath));
+      data.count++;
+      fs.writeFileSync(counterPath, JSON.stringify(data, null, 2));
+
+      const confessionNumber = data.count;
+
+      // Confesser name
+      let confesserName;
+      if (type === "anonymous") {
+        confesserName = "Anonymous";
+      } else {
+        confesserName =
+          interaction.member.nickname ||
+          interaction.user.username;
+      }
+
+      // Confession embed
+      const embed = new EmbedBuilder()
+        .setTitle(`. . . ⇢ ˗ˏˋ [Confession No. ${confessionNumber}] ࿐ྂ`)
+        .setDescription(confessionText)
+        .setColor("#0A5CFF")
+        .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" })
+        .setImage("https://cdn.discordapp.com/attachments/1212370536416677949/1558581664337362944/44829883-69d6-4467-8cd9-8f645e59d42f.png");
+
+      const confesserComponent = {
+        type: ComponentType.ActionRow,
+        components: [
+          {
+            type: ComponentType.Button,
+            label: `✬ Confesser: ${confesserName} ✬`,
+            style: ButtonStyle.Secondary,
+            custom_id: "confesser_display",
+            disabled: true
+          }
+        ]
+      };
+
+      const channel = await client.channels.fetch("1555989423903080592");
+
+      const sent = await channel.send({
+        embeds: [embed],
+        components: [confesserComponent]
+      });
+
+      await sent.startThread({
+        name: "discussion",
+        autoArchiveDuration: 1440
+      });
+
+      return interaction.reply({
+        content: "✔ confession submitted",
         ephemeral: true
       });
     }

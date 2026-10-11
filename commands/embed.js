@@ -1,4 +1,3 @@
-// commands/embed.js
 const {
   SlashCommandBuilder,
   ModalBuilder,
@@ -18,6 +17,8 @@ module.exports = {
     ),
 
   async execute(interaction) {
+    if (interaction.options.getSubcommand() !== "create") return;
+
     const modal = new ModalBuilder()
       .setCustomId("embed_create_modal")
       .setTitle("Create Embed");

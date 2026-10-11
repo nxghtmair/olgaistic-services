@@ -7,6 +7,8 @@ const {
   ActionRowBuilder
 } = require("discord.js");
 
+const EMBED_ROLE_ID = "1558060223548231712";
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("embed")
@@ -29,6 +31,14 @@ module.exports = {
     ),
 
   async execute(interaction) {
+    // ROLE CHECK
+    if (!interaction.member.roles.cache.has(EMBED_ROLE_ID)) {
+      return interaction.reply({
+        content: "❌ Nice try bitch, but ur a bit too young for that.",
+        ephemeral: true
+      });
+    }
+
     const sub = interaction.options.getSubcommand();
 
     // /embed create

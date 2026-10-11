@@ -1,4 +1,3 @@
-// events/interactionCreate.js
 const {
   EmbedBuilder,
   ComponentType,
@@ -108,128 +107,83 @@ module.exports = {
     }
 
     // ─────────────────────────────────────────────
-    // 24 ANNOUNCEMENT — JIMP IMAGE GENERATION
+    // OLGAID — ACCOUNT ADD MODAL
     // ─────────────────────────────────────────────
-    if (interaction.isModalSubmit() && interaction.customId === "24_announce_modal") {
-      const desc = interaction.fields.getTextInputValue("24_desc");
+    if (interaction.isModalSubmit() && interaction.customId === "olgaid_add_modal") {
+      const username = interaction.fields.getTextInputValue("olgaid_username");
+      const dataPath = "./olgaIdData.json";
 
-      const nickname =
-        interaction.member?.nickname ||
-        interaction.user.username;
+      if (!fs.existsSync(dataPath)) {
+        fs.writeFileSync(
+          dataPath,
+          JSON.stringify({ users: {}, statsMessageId: null, statsChannelId: null }, null, 2)
+        );
+      }
 
-      const Jimp = require("jimp");
+      const data = JSON.parse(fs.readFileSync(dataPath));
+      const userId = interaction.user.id;
 
-      const template = await Jimp.read("./assets/24template.png");
+      if (!data.users[userId]) data.users[userId] = [];
+      data.users[userId].push(username);
 
-      const boxX = 150;
-      const boxY = 150;
-      const boxW = 900;
-      const boxH = 500;
+      fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
 
-      const font = await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK);
-
-      template.print(
-        font,
-        boxX,
-        boxY,
-        {
-          text: desc,
-          alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
-          alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE
-        },
-        boxW,
-        boxH
-      );
-
-      const outPath = "./assets/24output.png";
-      await template.writeAsync(outPath);
-
-      const embed = new EmbedBuilder()
-        .setTitle("↳ ❝ [24' News] ¡! ❞")
-        .setColor("#0A5CFF")
-        .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" })
-        .setImage("attachment://24output.png");
-
-      const announcerComponent = {
-        type: ComponentType.ActionRow,
-        components: [
-          {
-            type: ComponentType.Button,
-            style: ButtonStyle.Secondary,
-            label: `🗨️ Announcer: ${nickname}`,
-            custom_id: "announcer_display",
-            disabled: true
-          }
-        ]
-      };
-
-      const channel = await client.channels.fetch("1553495305591328888");
-
-      await channel.send({
-        embeds: [embed],
-        components: [announcerComponent],
-        files: [
-          {
-            attachment: outPath,
-            name: "24output.png"
-          }
-        ]
-      });
+      await updateOlgaIdStatsEmbed(client, data);
 
       return interaction.reply({
-        content: "✔ Announcement sent.",
+        content: `✔ Added Olga account \`${username}\`.`,
         ephemeral: true
       });
     }
 
     // ─────────────────────────────────────────────
-    // QOTD CREATE — MODAL HANDLER
+    // OLGAID — ACCOUNT DELETE MODAL
     // ─────────────────────────────────────────────
-    if (interaction.isModalSubmit() && interaction.customId === "qotd_create_modal") {
-      const desc = interaction.fields.getTextInputValue("qotd_desc");
+    if (interaction.isModalSubmit() && interaction.customId === "olgaid_delete_modal") {
+      const username = interaction.fields.getTextInputValue("olgaid_delete_username");
+      const dataPath = "./olgaIdData.json";
 
-      const nickname =
-        interaction.member?.nickname ||
-        interaction.user.username;
+      if (!fs.existsSync(dataPath)) {
+        return interaction.reply({
+          content: "❌ You don't have any Olga accounts registered.",
+          ephemeral: true
+        });
+      }
 
-      const embed = new EmbedBuilder()
-        .setTitle("=⌕ Question Of The Day  / ")
-        .setDescription(desc)
-        .setColor("#0A5CFF")
-        .setImage("https://cdn.discordapp.com/attachments/1212370536416677949/1558803111332552725/c30809f8-a26a-4e9e-91c6-aba7c6a2ffcd.png")
-        .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" });
+      const data = JSON.parse(fs.readFileSync(dataPath));
+      const userId = interaction.user.id;
+      const accounts = data.users?.[userId] || [];
 
-      const comp = {
-        type: ComponentType.ActionRow,
-        components: [
-          {
-            type: ComponentType.Button,
-            style: ButtonStyle.Secondary,
-            label: `↳ Curious bitch: ${nickname} ༉‧₊`,
-            custom_id: "qotd_display",
-            disabled: true
-          }
-        ]
-      };
+      if (!accounts.length) {
+        return interaction.reply({
+          content: "❌ You don't have any Olga accounts registered.",
+          ephemeral: true
+        });
+      }
 
-      const sent = await interaction.channel.send({
-        embeds: [embed],
-        components: [comp]
-      });
+      const idx = accounts.indexOf(username);
+      if (idx === -1) {
+        return interaction.reply({
+          content: "❌ That username isn't registered on your OlgaID.",
+          ephemeral: true
+        });
+      }
 
-      await sent.startThread({
-        name: "... [aotd] ◌ೄ ",
-        autoArchiveDuration: 1440
-      });
+      accounts.splice(idx, 1);
+      data.users[userId] = accounts;
+
+      fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
+
+      await updateOlgaIdStatsEmbed(client, data);
 
       return interaction.reply({
-        content: "✔ QOTD created.",
+        content: `✔ Deleted Olga account \`${username}\`.`,
         ephemeral: true
       });
     }
 
     // ─────────────────────────────────────────────
-    // CONFESSION SYSTEM
+    // CONFESSION SYSTEM (unchanged)
     // ─────────────────────────────────────────────
     if (interaction.isModalSubmit() && interaction.customId.startsWith("confession_modal_")) {
       const confessionText = interaction.fields.getTextInputValue("confession_text");
@@ -302,3 +256,37 @@ module.exports = {
     }
   }
 };
+
+// helper to rebuild OlgaID stats embed
+async function updateOlgaIdStatsEmbed(client, data) {
+  if (!data.statsMessageId || !data.statsChannelId) return;
+
+  const channel = await client.channels.fetch(data.statsChannelId).catch(() => null);
+  if (!channel) return;
+
+  const msg = await channel.messages.fetch(data.statsMessageId).catch(() => null);
+  if (!msg) return;
+
+  let desc = "";
+
+  for (const userId of Object.keys(data.users)) {
+    const accounts = data.users[userId];
+    if (!accounts.length) continue;
+
+    desc += `<@${userId}>\n`;
+    desc += `olga accounts: ${accounts.join(", ")}\n\n`;
+  }
+
+  if (!desc) {
+    desc = "No bitch has any Olga accounts yet.";
+  }
+
+  const embed = new EmbedBuilder()
+    .setTitle("- ̥۪͙۪˚┊❛ OlgaID stats❜┊˚ ̥۪͙۪◌ ")
+    .setDescription(desc)
+    .setColor("#0A5CFF")
+    .setImage("https://cdn.discordapp.com/attachments/1212370536416677949/1558810439494934598/bcedd98b-718d-441b-acb5-6594952e26eb.png")
+    .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" });
+
+  await msg.edit({ embeds: [embed] });
+}

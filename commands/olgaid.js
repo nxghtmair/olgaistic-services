@@ -4,10 +4,17 @@ const {
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
-  ActionRowBuilder
+  ActionRowBuilder,
+  EmbedBuilder,
+  ComponentType,
+  ButtonStyle
 } = require("discord.js");
 
+const fs = require("fs");
+const Jimp = require("jimp");
+
 const STATS_ROLE_ID = "1558060373972746300";
+const DATA_PATH = "./olgaIdData.json";
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -43,6 +50,16 @@ module.exports = {
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
 
+    // Ensure data file exists
+    if (!fs.existsSync(DATA_PATH)) {
+      fs.writeFileSync(
+        DATA_PATH,
+        JSON.stringify({ users: {}, statsMessageId: null, statsChannelId: null }, null, 2)
+      );
+    }
+
+    const data = JSON.parse(fs.readFileSync(DATA_PATH));
+
     // ─────────────────────────────────────────────
     // /olgaid account_add
     // ─────────────────────────────────────────────
@@ -57,9 +74,7 @@ module.exports = {
         .setStyle(TextInputStyle.Short)
         .setRequired(true);
 
-      modal.addComponents(
-        new ActionRowBuilder().addComponents(usernameField)
-      );
+      modal.addComponents(new ActionRowBuilder().addComponents(usernameField));
 
       return interaction.showModal(modal);
     }
@@ -68,17 +83,6 @@ module.exports = {
     // /olgaid account_delete
     // ─────────────────────────────────────────────
     if (sub === "account_delete") {
-      const fs = require("fs");
-      const dataPath = "./olgaIdData.json";
-
-      if (!fs.existsSync(dataPath)) {
-        return interaction.reply({
-          content: "❌ You don't have any Olga accounts registered.",
-          ephemeral: true
-        });
-      }
-
-      const data = JSON.parse(fs.readFileSync(dataPath));
       const userId = interaction.user.id;
       const accounts = data.users?.[userId] || [];
 
@@ -100,30 +104,17 @@ module.exports = {
         .setRequired(true)
         .setPlaceholder(accounts.join(", "));
 
-      modal.addComponents(
-        new ActionRowBuilder().addComponents(deleteField)
-      );
+      modal.addComponents(new ActionRowBuilder().addComponents(deleteField));
 
       return interaction.showModal(modal);
     }
 
     // ─────────────────────────────────────────────
-    // /olgaid show  (FIXED LIST PRINTING)
+    // /olgaid show  (FULL RESPONSIVE TEXT RENDERER)
     // ─────────────────────────────────────────────
     if (sub === "show") {
-      const fs = require("fs");
-      const Jimp = require("jimp");
-
       await interaction.deferReply();
 
-      const dataPath = "./olgaIdData.json";
-      if (!fs.existsSync(dataPath)) {
-        return interaction.editReply({
-          content: "❌ This bitch has no Olga accounts registered."
-        });
-      }
-
-      const data = JSON.parse(fs.readFileSync(dataPath));
       const target = interaction.options.getUser("user");
       const userId = target.id;
       const accounts = data.users?.[userId] || [];
@@ -138,7 +129,7 @@ module.exports = {
         interaction.guild.members.cache.get(userId)?.nickname ||
         target.username;
 
-      // LOAD TEMPLATE
+      // Load template
       const template = await Jimp.read("./assets/olgaid_template.png");
 
       // Placeholder box
@@ -147,25 +138,46 @@ module.exports = {
       const boxW = 800;
       const boxH = 500;
 
-      // Dynamic font size
-      let fontSize = 48;
-      if (accounts.length > 5) fontSize = 32;
-      if (accounts.length > 10) fontSize = 24;
+      // Start with large font
+      let fontSize = 64;
 
-      const font =
-        fontSize >= 48
-          ? await Jimp.loadFont(Jimp.FONT_SANS_64_BLACK)
-          : fontSize >= 32
-          ? await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK)
-          : await Jimp.loadFont(Jimp.FONT_SANS_16_BLACK);
+      const loadFont = async size => {
+        if (size >= 64) return await Jimp.loadFont(Jimp.FONT_SANS_64_BLACK);
+        if (size >= 32) return await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK);
+        return await Jimp.loadFont(Jimp.FONT_SANS_16_BLACK);
+      };
 
-      // Line height
-      const lineHeight = fontSize + 10;
+      let font = await loadFont(fontSize);
+      let lineHeight = fontSize + 10;
 
-      // Start at top of placeholder
+      // Shrink font until everything fits
+      while (true) {
+        let fits = true;
+
+        // Vertical overflow check
+        if (accounts.length * lineHeight > boxH) fits = false;
+
+        // Horizontal overflow check
+        for (const username of accounts) {
+          const width = Jimp.measureText(font, username);
+          if (width > boxW - 20) {
+            fits = false;
+            break;
+          }
+        }
+
+        if (fits) break;
+
+        fontSize -= 4;
+        if (fontSize < 16) break;
+
+        font = await loadFont(fontSize);
+        lineHeight = fontSize + 10;
+      }
+
+      // Print usernames line-by-line
       let currentY = boxY;
 
-      // Print each username line-by-line
       for (const username of accounts) {
         if (currentY + lineHeight > boxY + boxH) break;
 
@@ -187,8 +199,6 @@ module.exports = {
 
       const outPath = `./assets/olgaid_${userId}.png`;
       await template.writeAsync(outPath);
-
-      const { EmbedBuilder, ComponentType, ButtonStyle } = require("discord.js");
 
       const embed = new EmbedBuilder()
         .setColor("#0A5CFF")
@@ -221,7 +231,7 @@ module.exports = {
     }
 
     // ─────────────────────────────────────────────
-    // /olgaid stats  (FIXED deferReply)
+    // /olgaid stats
     // ─────────────────────────────────────────────
     if (sub === "stats") {
       if (!interaction.member.roles.cache.has(STATS_ROLE_ID)) {
@@ -233,39 +243,25 @@ module.exports = {
 
       await interaction.deferReply();
 
-      const fs = require("fs");
-      const dataPath = "./olgaIdData.json";
-
-      if (!fs.existsSync(dataPath)) {
-        fs.writeFileSync(
-          dataPath,
-          JSON.stringify({ users: {}, statsMessageId: null, statsChannelId: null }, null, 2)
-        );
-      }
-
-      const data = JSON.parse(fs.readFileSync(dataPath));
-
-      const { EmbedBuilder } = require("discord.js");
-
       let desc = "";
 
-      for (const userId of Object.keys(data.users)) {
-        const accounts = data.users[userId];
+      for (const uid of Object.keys(data.users)) {
+        const accounts = data.users[uid];
         if (!accounts.length) continue;
 
-        desc += `<@${userId}>\n`;
+        desc += `<@${uid}>\n`;
         desc += `olga accounts: ${accounts.join(", ")}\n\n`;
       }
 
-      if (!desc) {
-        desc = "No bitch has any Olga accounts yet.";
-      }
+      if (!desc) desc = "No bitch has any Olga accounts yet.";
 
       const embed = new EmbedBuilder()
         .setTitle("- ̥۪͙۪˚┊❛ OlgaID stats❜┊˚ ̥۪͙۪◌ ")
         .setDescription(desc)
         .setColor("#0A5CFF")
-        .setImage("https://cdn.discordapp.com/attachments/1212370536416677949/1558810439494934598/bcedd98b-718d-441b-acb5-6594952e26eb.png")
+        .setImage(
+          "https://cdn.discordapp.com/attachments/1212370536416677949/1558810439494934598/bcedd98b-718d-441b-acb5-6594952e26eb.png"
+        )
         .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" });
 
       const sent = await interaction.editReply({
@@ -275,7 +271,7 @@ module.exports = {
 
       data.statsMessageId = sent.id;
       data.statsChannelId = sent.channel.id;
-      fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
+      fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
 
       return;
     }

@@ -103,161 +103,164 @@ module.exports = {
       return interaction.showModal(modal);
     }
 
-    // /olgaid show
-    if (sub === "show") {
-      const fs = require("fs");
-      const Jimp = require("jimp");
+   // /olgaid show
+if (sub === "show") {
+  const fs = require("fs");
+  const Jimp = require("jimp");
 
-      const dataPath = "./olgaIdData.json";
-      if (!fs.existsSync(dataPath)) {
-        return interaction.reply({
-          content: "❌ This bitch has no Olga accounts registered.",
-          ephemeral: true
-        });
+  // ACKNOWLEDGE INTERACTION IMMEDIATELY
+  await interaction.deferReply();   // ← FIX
+
+  const dataPath = "./olgaIdData.json";
+  if (!fs.existsSync(dataPath)) {
+    return interaction.editReply({   // ← FIX
+      content: "❌ This bitch has no Olga accounts registered."
+    });
+  }
+
+  const data = JSON.parse(fs.readFileSync(dataPath));
+  const target = interaction.options.getUser("user");
+  const userId = target.id;
+  const accounts = data.users?.[userId] || [];
+
+  if (!accounts.length) {
+    return interaction.editReply({
+      content: "❌ This bitch has no Olga accounts registered."
+    });
+  }
+
+  const nickname =
+    interaction.guild.members.cache.get(userId)?.nickname ||
+    target.username;
+
+  // LOAD TEMPLATE
+  const template = await Jimp.read("./assets/olgaid_template.png");
+
+  const boxX = 150;
+  const boxY = 200;
+  const boxW = 800;
+  const boxH = 500;
+
+  const text = accounts.join("\n");
+
+  // DYNAMIC FONT SIZE
+  let fontSize = 48;
+  if (accounts.length > 5) fontSize = 32;
+  if (accounts.length > 10) fontSize = 24;
+
+  const font =
+    fontSize >= 48
+      ? await Jimp.loadFont(Jimp.FONT_SANS_64_BLACK)
+      : fontSize >= 32
+      ? await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK)
+      : await Jimp.loadFont(Jimp.FONT_SANS_16_BLACK);
+
+  template.print(
+    font,
+    boxX,
+    boxY,
+    {
+      text,
+      alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
+      alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE
+    },
+    boxW,
+    boxH
+  );
+
+  const outPath = `./assets/olgaid_${userId}.png`;
+  await template.writeAsync(outPath);
+
+  const { EmbedBuilder, ComponentType, ButtonStyle } = require("discord.js");
+
+  const embed = new EmbedBuilder()
+    .setColor("#0A5CFF")
+    .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" })
+    .setImage("attachment://olgaid_card.png");
+
+  const comp = {
+    type: ComponentType.ActionRow,
+    components: [
+      {
+        type: ComponentType.Button,
+        style: ButtonStyle.Secondary,
+        label: `↳˳;; ❝ This card belongs to: ${nickname} ᵕ̈೫˚∗`,
+        custom_id: "olgaid_display",
+        disabled: true
       }
+    ]
+  };
 
-      const data = JSON.parse(fs.readFileSync(dataPath));
-      const target = interaction.options.getUser("user");
-      const userId = target.id;
-      const accounts = data.users?.[userId] || [];
-
-      if (!accounts.length) {
-        return interaction.reply({
-          content: "❌ This bitch has no Olga accounts registered.",
-          ephemeral: true
-        });
+  return interaction.editReply({   // ← FIX
+    embeds: [embed],
+    components: [comp],
+    files: [
+      {
+        attachment: outPath,
+        name: "olgaid_card.png"
       }
+    ]
+  });
+}
 
-      const nickname =
-        interaction.guild.members.cache.get(userId)?.nickname ||
-        target.username;
 
-      const template = await Jimp.read("./assets/olgaid_template.png");
+   // /olgaid stats
+if (sub === "stats") {
+  if (!interaction.member.roles.cache.has(STATS_ROLE_ID)) {
+    return interaction.reply({
+      content: "❌ You don't have enough perms, bitch.",
+      ephemeral: true
+    });
+  }
 
-      const boxX = 150;
-      const boxY = 200;
-      const boxW = 800;
-      const boxH = 500;
+  await interaction.deferReply(); // ← REQUIRED FIX
 
-      const text = accounts.join("\n");
+  const fs = require("fs");
+  const dataPath = "./olgaIdData.json";
 
-      let fontSize = 48;
-      if (accounts.length > 5) fontSize = 32;
-      if (accounts.length > 10) fontSize = 24;
+  if (!fs.existsSync(dataPath)) {
+    fs.writeFileSync(
+      dataPath,
+      JSON.stringify({ users: {}, statsMessageId: null, statsChannelId: null }, null, 2)
+    );
+  }
 
-      const font = await Jimp.loadFont(
-        fontSize >= 48
-          ? Jimp.FONT_SANS_64_BLACK
-          : fontSize >= 32
-          ? Jimp.FONT_SANS_32_BLACK
-          : Jimp.FONT_SANS_16_BLACK
-      );
+  const data = JSON.parse(fs.readFileSync(dataPath));
 
-      template.print(
-        font,
-        boxX,
-        boxY,
-        {
-          text,
-          alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
-          alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE
-        },
-        boxW,
-        boxH
-      );
+  const { EmbedBuilder } = require("discord.js");
 
-      const outPath = `./assets/olgaid_${userId}.png`;
-      await template.writeAsync(outPath);
+  let desc = "";
 
-      const { EmbedBuilder, ComponentType, ButtonStyle } = require("discord.js");
+  for (const userId of Object.keys(data.users)) {
+    const accounts = data.users[userId];
+    if (!accounts.length) continue;
 
-      const embed = new EmbedBuilder()
-        .setColor("#0A5CFF")
-        .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" })
-        .setImage("attachment://olgaid_card.png");
+    desc += `<@${userId}>\n`;
+    desc += `olga accounts: ${accounts.join(", ")}\n\n`;
+  }
 
-      const comp = {
-        type: ComponentType.ActionRow,
-        components: [
-          {
-            type: ComponentType.Button,
-            style: ButtonStyle.Secondary,
-            label: `↳˳;; ❝ This card belongs to: ${nickname} ᵕ̈೫˚∗`,
-            custom_id: "olgaid_display",
-            disabled: true
-          }
-        ]
-      };
+  if (!desc) {
+    desc = "No bitch has any Olga accounts yet.";
+  }
 
-      await interaction.reply({
-        embeds: [embed],
-        components: [comp],
-        files: [
-          {
-            attachment: outPath,
-            name: "olgaid_card.png"
-          }
-        ],
-        ephemeral: false
-      });
+  const embed = new EmbedBuilder()
+    .setTitle("- ̥۪͙۪˚┊❛ OlgaID stats❜┊˚ ̥۪͙۪◌ ")
+    .setDescription(desc)
+    .setColor("#0A5CFF")
+    .setImage("https://cdn.discordapp.com/attachments/1212370536416677949/1558810439494934598/bcedd98b-718d-441b-acb5-6594952e26eb.png")
+    .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" });
 
-      return;
-    }
+  const sent = await interaction.editReply({  // ← REQUIRED FIX
+    embeds: [embed],
+    ephemeral: false
+  });
 
-    // /olgaid stats
-    if (sub === "stats") {
-      if (!interaction.member.roles.cache.has(STATS_ROLE_ID)) {
-        return interaction.reply({
-          content: "❌ You don't have enough perms, bitch.",
-          ephemeral: true
-        });
-      }
+  data.statsMessageId = sent.id;
+  data.statsChannelId = sent.channel.id;
+  fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
 
-      const fs = require("fs");
-      const dataPath = "./olgaIdData.json";
+  return;
+}
 
-      if (!fs.existsSync(dataPath)) {
-        fs.writeFileSync(
-          dataPath,
-          JSON.stringify({ users: {}, statsMessageId: null, statsChannelId: null }, null, 2)
-        );
-      }
-
-      const data = JSON.parse(fs.readFileSync(dataPath));
-
-      const { EmbedBuilder } = require("discord.js");
-
-      let desc = "";
-
-      for (const userId of Object.keys(data.users)) {
-        const accounts = data.users[userId];
-        if (!accounts.length) continue;
-
-        desc += `<@${userId}>\n`;
-        desc += `olga accounts: ${accounts.join(", ")}\n\n`;
-      }
-
-      if (!desc) {
-        desc = "No bitch has any Olga accounts yet.";
-      }
-
-      const embed = new EmbedBuilder()
-        .setTitle("- ̥۪͙۪˚┊❛ OlgaID stats❜┊˚ ̥۪͙۪◌ ")
-        .setDescription(desc)
-        .setColor("#0A5CFF")
-        .setImage("https://cdn.discordapp.com/attachments/1212370536416677949/1558810439494934598/bcedd98b-718d-441b-acb5-6594952e26eb.png")
-        .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" });
-
-      const sent = await interaction.reply({
-        embeds: [embed],
-        ephemeral: false
-      });
-
-      data.statsMessageId = sent.id;
-      data.statsChannelId = sent.channel.id;
-      fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
-
-      return;
-    }
   }
 };

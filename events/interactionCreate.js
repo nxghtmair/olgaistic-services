@@ -1,11 +1,8 @@
+// events/interactionCreate.js
 const {
   EmbedBuilder,
   ComponentType,
-  ButtonStyle,
-  ModalBuilder,
-  TextInputBuilder,
-  TextInputStyle,
-  ActionRowBuilder
+  ButtonStyle
 } = require("discord.js");
 
 const fs = require("fs");
@@ -181,6 +178,52 @@ module.exports = {
 
       return interaction.reply({
         content: "✔ Announcement sent.",
+        ephemeral: true
+      });
+    }
+
+    // ─────────────────────────────────────────────
+    // QOTD CREATE — MODAL HANDLER
+    // ─────────────────────────────────────────────
+    if (interaction.isModalSubmit() && interaction.customId === "qotd_create_modal") {
+      const desc = interaction.fields.getTextInputValue("qotd_desc");
+
+      const nickname =
+        interaction.member?.nickname ||
+        interaction.user.username;
+
+      const embed = new EmbedBuilder()
+        .setTitle("=⌕ Question Of The Day  / ")
+        .setDescription(desc)
+        .setColor("#0A5CFF")
+        .setImage("https://cdn.discordapp.com/attachments/1212370536416677949/1558803111332552725/c30809f8-a26a-4e9e-91c6-aba7c6a2ffcd.png")
+        .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" });
+
+      const comp = {
+        type: ComponentType.ActionRow,
+        components: [
+          {
+            type: ComponentType.Button,
+            style: ButtonStyle.Secondary,
+            label: `↳ Curious bitch: ${nickname} ༉‧₊`,
+            custom_id: "qotd_display",
+            disabled: true
+          }
+        ]
+      };
+
+      const sent = await interaction.channel.send({
+        embeds: [embed],
+        components: [comp]
+      });
+
+      await sent.startThread({
+        name: "... [aotd] ◌ೄ ",
+        autoArchiveDuration: 1440
+      });
+
+      return interaction.reply({
+        content: "✔ QOTD created.",
         ephemeral: true
       });
     }

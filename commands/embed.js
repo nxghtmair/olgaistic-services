@@ -1,4 +1,3 @@
-// commands/embed.js
 const {
   SlashCommandBuilder,
   ModalBuilder,
@@ -31,11 +30,10 @@ module.exports = {
     ),
 
   async execute(interaction) {
-    // ROLE CHECK
     if (!interaction.member.roles.cache.has(EMBED_ROLE_ID)) {
       return interaction.reply({
         content: "❌ Nice try bitch, but ur a bit too young for that.",
-        ephemeral: true
+        flags: 64
       });
     }
 
@@ -51,26 +49,22 @@ module.exports = {
         new TextInputBuilder()
           .setCustomId("title")
           .setLabel("Title")
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false),
+          .setStyle(TextInputStyle.Short),
 
         new TextInputBuilder()
           .setCustomId("desc")
           .setLabel("Description")
-          .setStyle(TextInputStyle.Paragraph)
-          .setRequired(false),
+          .setStyle(TextInputStyle.Paragraph),
 
         new TextInputBuilder()
           .setCustomId("image")
           .setLabel("Image URL")
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false),
+          .setStyle(TextInputStyle.Short),
 
         new TextInputBuilder()
-          .setCustomId("thumb")
-          .setLabel("Thumbnail URL")
+          .setCustomId("attachment")
+          .setLabel("Attachment Image URL")
           .setStyle(TextInputStyle.Short)
-          .setRequired(false)
       ];
 
       modal.addComponents(
@@ -95,33 +89,53 @@ module.exports = {
         new TextInputBuilder()
           .setCustomId("title_1")
           .setLabel("Title for Embed 1")
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false),
+          .setStyle(TextInputStyle.Short),
 
         new TextInputBuilder()
           .setCustomId("desc_1")
           .setLabel("Description for Embed 1")
-          .setStyle(TextInputStyle.Paragraph)
-          .setRequired(false),
+          .setStyle(TextInputStyle.Paragraph),
+
+        new TextInputBuilder()
+          .setCustomId("image_1")
+          .setLabel("Image URL for Embed 1")
+          .setStyle(TextInputStyle.Short),
+
+        new TextInputBuilder()
+          .setCustomId("attachment_1")
+          .setLabel("Attachment Image URL for Embed 1")
+          .setStyle(TextInputStyle.Short),
 
         new TextInputBuilder()
           .setCustomId("title_2")
           .setLabel("Title for Embed 2")
-          .setStyle(TextInputStyle.Short)
-          .setRequired(false),
+          .setStyle(TextInputStyle.Short),
 
         new TextInputBuilder()
           .setCustomId("desc_2")
           .setLabel("Description for Embed 2")
-          .setStyle(TextInputStyle.Paragraph)
-          .setRequired(false)
+          .setStyle(TextInputStyle.Paragraph),
+
+        new TextInputBuilder()
+          .setCustomId("image_2")
+          .setLabel("Image URL for Embed 2")
+          .setStyle(TextInputStyle.Short),
+
+        new TextInputBuilder()
+          .setCustomId("attachment_2")
+          .setLabel("Attachment Image URL for Embed 2")
+          .setStyle(TextInputStyle.Short)
       ];
 
       modal.addComponents(
         new ActionRowBuilder().addComponents(fields[0]),
         new ActionRowBuilder().addComponents(fields[1]),
         new ActionRowBuilder().addComponents(fields[2]),
-        new ActionRowBuilder().addComponents(fields[3])
+        new ActionRowBuilder().addComponents(fields[3]),
+        new ActionRowBuilder().addComponents(fields[4]),
+        new ActionRowBuilder().addComponents(fields[5]),
+        new ActionRowBuilder().addComponents(fields[6]),
+        new ActionRowBuilder().addComponents(fields[7])
       );
 
       return interaction.showModal(modal);

@@ -1,4 +1,3 @@
-const { load, save } = require("../utils/chatTracker");
 const { EmbedBuilder } = require("discord.js");
 const fs = require("fs");
 
@@ -43,17 +42,6 @@ module.exports = {
     if (stickyRR && stickyRR.handleMessage) {
       stickyRR.handleMessage(message);
     }
-
-    // CHAT TRACKER (your original system)
-    const dataOld = load();
-
-    if (!dataOld.overall[message.author.id]) dataOld.overall[message.author.id] = 0;
-    dataOld.overall[message.author.id]++;
-
-    if (!dataOld.weekly[message.author.id]) dataOld.weekly[message.author.id] = 0;
-    dataOld.weekly[message.author.id]++;
-
-    save(dataOld);
 
     // ─────────────────────────────────────────────
     // XP SYSTEM
@@ -110,7 +98,11 @@ module.exports = {
         leaderboardIntervalStarted = true;
 
         setInterval(async () => {
-          await updateLeaderboard(client);
+          try {
+            await updateLeaderboard(client);
+          } catch (err) {
+            console.log("Leaderboard refresh error:", err.message);
+          }
         }, 15000);
       }
     }

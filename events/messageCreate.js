@@ -32,6 +32,8 @@ if (!fs.existsSync(statePath)) {
   );
 }
 
+let leaderboardIntervalStarted = false;
+
 module.exports = {
   name: "messageCreate",
   async execute(message, stickyRR, client) {
@@ -54,7 +56,7 @@ module.exports = {
     save(dataOld);
 
     // ─────────────────────────────────────────────
-    // XP SYSTEM (NEW)
+    // XP SYSTEM
     // ─────────────────────────────────────────────
     if (message.channel.id === CHAT_CHANNEL_ID) {
       const xpData = loadData();
@@ -83,6 +85,9 @@ module.exports = {
                 new EmbedBuilder()
                   .setColor("#0A5CFF")
                   .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" })
+                  .setImage(
+                    "https://cdn.discordapp.com/attachments/1212370536416677949/1559205924869120000/ae7fdb06-9a57-4795-90a8-a0c58864bd6a.png"
+                  )
                   .setDescription(
                     `congratulations <@${userId}> , your fat ass has advanced from <@&${oldLevel.roleId}> to <@&${newLevel.roleId}> !`
                   )
@@ -99,6 +104,15 @@ module.exports = {
 
       // Update leaderboard
       await updateLeaderboard(client);
+
+      // Start auto-refresh every 15 seconds (only once)
+      if (!leaderboardIntervalStarted) {
+        leaderboardIntervalStarted = true;
+
+        setInterval(async () => {
+          await updateLeaderboard(client);
+        }, 15000);
+      }
     }
 
     // ─────────────────────────────────────────────

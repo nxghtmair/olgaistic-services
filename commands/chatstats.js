@@ -40,6 +40,9 @@ module.exports = {
       .setColor("#0A5CFF")
       .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" })
       .setThumbnail(target.displayAvatarURL({ dynamic: true }))
+      .setImage(
+        "https://cdn.discordapp.com/attachments/1212370536416677949/1559205924869120000/ae7fdb06-9a57-4795-90a8-a0c58864bd6a.png"
+      )
       .setDescription(
         [
           `**User:** ${nick}`,

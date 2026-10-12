@@ -3,6 +3,7 @@ const fs = require("fs");
 const DATA_PATH = "./xpData.json";
 
 const CHAT_CHANNEL_ID = "1513932845922385920";
+const LEADERBOARD_CHANNEL_ID = "1555618153231552584";
 const OLGA_OF_CHATS_ROLE_ID = "1559138180274585640";
 const OLGA_OF_CHATS_ANNOUNCE_CHANNEL_ID = "1517175386021040138";
 
@@ -23,7 +24,6 @@ function loadData() {
       JSON.stringify(
         {
           users: {},
-          leaderboardChannelId: null,
           leaderboardMessageId: null,
           currentOlgaOfChatsId: null
         },
@@ -129,13 +129,10 @@ async function recalcOlgaOfChats(client) {
 
 async function updateLeaderboard(client) {
   const data = loadData();
-  const channelId = data.leaderboardChannelId;
-  if (!channelId) return;
-
   const guild = client.guilds.cache.first();
   if (!guild) return;
 
-  const channel = guild.channels.cache.get(channelId);
+  const channel = guild.channels.cache.get(LEADERBOARD_CHANNEL_ID);
   if (!channel) return;
 
   const usersArr = Object.entries(data.users).sort((a, b) => b[1].xp - a[1].xp);

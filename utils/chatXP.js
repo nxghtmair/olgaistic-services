@@ -1,9 +1,10 @@
 const fs = require("fs");
 
-const DATA_PATH = "./utils/chatData.json"; // FIXED — now uses chatData.json
+const DATA_PATH = "./utils/chatData.json";
 
 const CHAT_CHANNEL_ID = "1513932845922385920";
 const LEADERBOARD_CHANNEL_ID = "1555618153231552584";
+const LEADERBOARD_MESSAGE_ID = "1559212395102994527"; // FIXED — always edit THIS message
 const OLGA_OF_CHATS_ROLE_ID = "1559138180274585640";
 const OLGA_OF_CHATS_ANNOUNCE_CHANNEL_ID = "1517175386021040138";
 
@@ -24,7 +25,6 @@ function loadData() {
       JSON.stringify(
         {
           users: {},
-          leaderboardMessageId: null,
           currentOlgaOfChatsId: null
         },
         null,
@@ -126,6 +126,9 @@ async function updateLeaderboard(client) {
   const channel = guild.channels.cache.get(LEADERBOARD_CHANNEL_ID);
   if (!channel) return;
 
+  let msg = await channel.messages.fetch(LEADERBOARD_MESSAGE_ID).catch(() => null);
+  if (!msg) return; // NEVER CREATE NEW MESSAGE
+
   const usersArr = Object.entries(data.users).sort((a, b) => b[1].xp - a[1].xp);
 
   let desc = "";
@@ -156,19 +159,6 @@ async function updateLeaderboard(client) {
     color: 0x0a5cff,
     footer: { text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" }
   };
-
-  let msg = null;
-
-  if (data.leaderboardMessageId) {
-    msg = await channel.messages.fetch(data.leaderboardMessageId).catch(() => null);
-  }
-
-  if (!msg) {
-    msg = await channel.send({ embeds: [leaderboardEmbed, olgaEmbed] });
-    data.leaderboardMessageId = msg.id;
-    saveData(data);
-    return;
-  }
 
   await msg.edit({ embeds: [leaderboardEmbed, olgaEmbed] });
 }

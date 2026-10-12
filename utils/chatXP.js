@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-const DATA_PATH = "./xpData.json";
+const DATA_PATH = "./utils/chatData.json"; // FIXED — now uses chatData.json
 
 const CHAT_CHANNEL_ID = "1513932845922385920";
 const LEADERBOARD_CHANNEL_ID = "1555618153231552584";
@@ -62,15 +62,13 @@ function getNextLevel(xp) {
 }
 
 async function updateUserRoles(member, oldLevelKey, newLevelKey) {
-  const guild = member.guild;
-
   const oldLevel = LEVELS.find(l => l.key === oldLevelKey);
   const newLevel = LEVELS.find(l => l.key === newLevelKey);
 
-  if (oldLevel && oldLevel.roleId) {
+  if (oldLevel?.roleId) {
     await member.roles.remove(oldLevel.roleId).catch(() => {});
   }
-  if (newLevel && newLevel.roleId) {
+  if (newLevel?.roleId) {
     await member.roles.add(newLevel.roleId).catch(() => {});
   }
 }
@@ -95,29 +93,22 @@ async function recalcOlgaOfChats(client) {
 
   if (oldOlgaId) {
     const oldMember = await guild.members.fetch(oldOlgaId).catch(() => null);
-    if (oldMember && olgaRole) {
-      await oldMember.roles.remove(olgaRole).catch(() => {});
-    }
+    if (oldMember) await oldMember.roles.remove(olgaRole).catch(() => {});
   }
 
-  if (newOlgaId && olgaRole) {
+  if (newOlgaId) {
     const newMember = await guild.members.fetch(newOlgaId).catch(() => null);
-    if (newMember) {
-      await newMember.roles.add(olgaRole).catch(() => {});
-    }
+    if (newMember) await newMember.roles.add(olgaRole).catch(() => {});
   }
 
   if (announceChannel && newOlgaId) {
-    const oldMention = oldOlgaId ? `<@${oldOlgaId}>` : "no one";
-    const newMention = `<@${newOlgaId}>`;
-
     await announceChannel.send({
       embeds: [
         {
           color: 0x0a5cff,
           footer: { text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" },
           description:
-            `- laughs uncontrollably- -slaps hand on forehead- look at ${oldMention} , so naive about being the olga of che chats! ${newMention} is now the Olga of The Chats.`
+            `- laughs uncontrollably- -slaps hand on forehead- look at <@${oldOlgaId}> , so naive about being the olga of che chats! <@${newOlgaId}> is now the Olga of The Chats.`
         }
       ]
     });

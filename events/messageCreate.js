@@ -97,65 +97,17 @@ module.exports = {
       if (!leaderboardIntervalStarted) {
         leaderboardIntervalStarted = true;
 
-        setInterval(async () => {
-          try {
-            const data = loadData();
-            const guild = client.guilds.cache.first();
-            const channel = guild.channels.cache.get(LEADERBOARD_CHANNEL_ID);
-            if (!channel) return;
+        client.once("clientReady", async () => {
+          console.log("Leaderboard system activated.");
 
-            // Build embeds
-            const usersArr = Object.entries(data.users).sort((a, b) => b[1].xp - a[1].xp);
-
-            let desc = "";
-            let rank = 1;
-            for (const [userId, stats] of usersArr) {
-              desc += `#${rank} <@${userId}> — XP: ${stats.xp}, messages: ${stats.messages}\n`;
-              rank++;
+          setInterval(async () => {
+            try {
+              await updateLeaderboard(client);
+            } catch (err) {
+              console.log("Leaderboard edit error:", err.message);
             }
-            if (!desc) desc = "No bitch has chatted yet.";
-
-            const olgaId = data.currentOlgaOfChatsId;
-            const olgaRoleMention = "<@&1559138180274585640>";
-            const olgaUserMention = olgaId ? `<@${olgaId}>` : "no one";
-
-            const leaderboardEmbed = new EmbedBuilder()
-              .setTitle("-ˏˋ Chat leaderboard ˊˎ")
-              .setDescription(desc)
-              .setColor("#0A5CFF")
-              .setImage(
-                "https://cdn.discordapp.com/attachments/1212370536416677949/1559140867917484073/630ce052-5810-46e0-b237-1b18cb772544.png"
-              )
-              .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" });
-
-            const olgaEmbed = new EmbedBuilder()
-              .setTitle("- ̥۪͙۪˚┊❛ The Olga of the chats ❜┊˚ ̥۪͙۪◌ ")
-              .setDescription(`${olgaUserMention} is currently the ${olgaRoleMention}`)
-              .setColor("#0A5CFF")
-              .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" });
-
-            let msg = null;
-
-            // Try to fetch existing leaderboard message
-            if (data.leaderboardMessageId) {
-              msg = await channel.messages.fetch(data.leaderboardMessageId).catch(() => null);
-            }
-
-            // If message doesn't exist → create new one
-            if (!msg) {
-              msg = await channel.send({ embeds: [leaderboardEmbed, olgaEmbed] });
-              data.leaderboardMessageId = msg.id;
-              saveData(data);
-              return;
-            }
-
-            // Edit existing message
-            await msg.edit({ embeds: [leaderboardEmbed, olgaEmbed] });
-
-          } catch (err) {
-            console.log("Leaderboard edit error:", err.message);
-          }
-        }, 15000);
+          }, 15000);
+        });
       }
     }
 

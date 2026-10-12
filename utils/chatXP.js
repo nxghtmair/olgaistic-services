@@ -1,4 +1,3 @@
-// utils/chatXP.js
 const fs = require("fs");
 
 const DATA_PATH = "./xpData.json";
@@ -79,7 +78,6 @@ async function updateUserRoles(member, oldLevelKey, newLevelKey) {
 async function recalcOlgaOfChats(client) {
   const data = loadData();
 
-  // najdi všechny s 4000+ XP
   const eligible = Object.entries(data.users)
     .filter(([id, u]) => u.xp >= 4000)
     .sort((a, b) => b[1].xp - a[1].xp);
@@ -87,7 +85,7 @@ async function recalcOlgaOfChats(client) {
   const newOlgaId = eligible.length ? eligible[0][0] : null;
   const oldOlgaId = data.currentOlgaOfChatsId;
 
-  if (newOlgaId === oldOlgaId) return; // nic se nezměnilo
+  if (newOlgaId === oldOlgaId) return;
 
   const guild = client.guilds.cache.first();
   if (!guild) return;
@@ -95,7 +93,6 @@ async function recalcOlgaOfChats(client) {
   const olgaRole = guild.roles.cache.get(OLGA_OF_CHATS_ROLE_ID);
   const announceChannel = guild.channels.cache.get(OLGA_OF_CHATS_ANNOUNCE_CHANNEL_ID);
 
-  // odeber roli staré Olze
   if (oldOlgaId) {
     const oldMember = await guild.members.fetch(oldOlgaId).catch(() => null);
     if (oldMember && olgaRole) {
@@ -103,7 +100,6 @@ async function recalcOlgaOfChats(client) {
     }
   }
 
-  // přidej roli nové Olze
   if (newOlgaId && olgaRole) {
     const newMember = await guild.members.fetch(newOlgaId).catch(() => null);
     if (newMember) {
@@ -111,7 +107,6 @@ async function recalcOlgaOfChats(client) {
     }
   }
 
-  // oznámení
   if (announceChannel && newOlgaId) {
     const oldMention = oldOlgaId ? `<@${oldOlgaId}>` : "no one";
     const newMention = `<@${newOlgaId}>`;
@@ -174,18 +169,20 @@ async function updateLeaderboard(client) {
     footer: { text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" }
   };
 
-  let msg;
+  let msg = null;
+
   if (data.leaderboardMessageId) {
     msg = await channel.messages.fetch(data.leaderboardMessageId).catch(() => null);
   }
 
-  if (msg) {
-    await msg.edit({ embeds: [leaderboardEmbed, olgaEmbed] });
-  } else {
+  if (!msg) {
     msg = await channel.send({ embeds: [leaderboardEmbed, olgaEmbed] });
     data.leaderboardMessageId = msg.id;
     saveData(data);
+    return;
   }
+
+  await msg.edit({ embeds: [leaderboardEmbed, olgaEmbed] });
 }
 
 module.exports = {

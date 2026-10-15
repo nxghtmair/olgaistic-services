@@ -12,6 +12,9 @@ const path = require("path");
 
 const statusConfig = require("./status.js");
 
+const { connectMongo } =
+  require("./utils/mongo");
+
 // Commands
 const stickyRR = require("./commands/stickyrr.js");
 
@@ -64,5 +67,9 @@ client.on("interactionCreate", (interaction) =>
     stickyRR
   )
 );
-
-client.login(process.env.TOKEN);
+connectMongo()
+  .then(() => {
+    client.login(
+      process.env.TOKEN
+    );
+  });

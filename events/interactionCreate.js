@@ -203,24 +203,60 @@ module.exports = {
       });
     }
 
-// QOTD MODAL
+// ─────────────────────────────────────────────
+// QOTD SYSTEM
+// ─────────────────────────────────────────────
 if (
   interaction.isModalSubmit() &&
   interaction.customId === "qotd_create_modal"
 ) {
-  const desc =
-    interaction.fields.getTextInputValue("qotd_desc");
+  const question =
+    interaction.fields.getTextInputValue(
+      "qotd_desc"
+    );
 
-  const embed = new EmbedBuilder()
-    .setColor("#0A5CFF")
-    .setTitle("QOTD")
-    .setDescription(desc)
-    .setFooter({
-      text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇"
+  const nickname =
+    interaction.member?.nickname ||
+    interaction.user.username;
+
+  const embed =
+    new EmbedBuilder()
+      .setTitle(
+        "≡⊹ Question Of The Day /"
+      )
+      .setDescription(question)
+      .setColor("#0A5CFF")
+      .setImage(
+        "https://cdn.discordapp.com/attachments/1212370536416677949/1559141947967500318/aefcf352-a37a-4530-a668-e0d74f8a6cef.png"
+      )
+      .setFooter({
+        text:
+          "⋇⊶⊰The Olgas: Season 5⊱⊷⋇"
+      });
+
+  const curiousComponent = {
+    type: ComponentType.ActionRow,
+    components: [
+      {
+        type: ComponentType.Button,
+        style: ButtonStyle.Secondary,
+        label: `↳ Curious bitch: ${nickname} ↷`,
+        custom_id: "qotd_display",
+        disabled: true
+      }
+    ]
+  };
+
+  const sent =
+    await interaction.channel.send({
+      content: "@everyone",
+      embeds: [embed],
+      components: [curiousComponent]
     });
 
-  await interaction.channel.send({
-    embeds: [embed]
+  await sent.startThread({
+    name: "discussion",
+    autoArchiveDuration: 1440
   });
 
   return interaction.reply({

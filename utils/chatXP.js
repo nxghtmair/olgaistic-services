@@ -1,7 +1,5 @@
 const fs = require("fs");
 
-const { getDb } = require("./mongo");
-
 const DATA_PATH = "./utils/chatData.json";
 
 const CHAT_CHANNEL_ID = "1513932845922385920";
@@ -37,21 +35,9 @@ function loadData() {
   return JSON.parse(fs.readFileSync(DATA_PATH));
 }
 
-await db.collection("chatstats")
-.updateOne(
-  {
-    userId: message.author.id
-  },
-  {
-    $set: {
-      xp: stats.xp,
-      messages: stats.messages
-    }
-  },
-  {
-    upsert: true
-  }
-);
+function saveData(data) {
+  fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
+}
 
 function getUserData(data, userId) {
   if (!data.users[userId]) {

@@ -249,13 +249,13 @@ if (
 
   const sent =
     await interaction.channel.send({
-      content: "@everyone",
+      content: "<@&1560363695945551962>",
       embeds: [embed],
       components: [curiousComponent]
     });
 
   await sent.startThread({
-    name: "discussion",
+    name: "aotd",
     autoArchiveDuration: 1440
   });
 

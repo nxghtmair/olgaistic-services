@@ -1,5 +1,7 @@
 const fs = require("fs");
 
+const { getDb } = require("./mongo");
+
 const DATA_PATH = "./utils/chatData.json";
 
 const CHAT_CHANNEL_ID = "1513932845922385920";

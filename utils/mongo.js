@@ -22,3 +22,16 @@ module.exports = {
   connectMongo,
   getDb
 };
+
+const { getDb } = require("./mongo");
+
+setTimeout(async () => {
+  const db = getDb();
+
+  await db.collection("chatstats").insertOne({
+    test: true,
+    time: Date.now()
+  });
+
+  console.log("Mongo write test OK");
+}, 5000);

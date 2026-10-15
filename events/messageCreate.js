@@ -35,9 +35,21 @@ module.exports = {
     if (stickyRR?.handleMessage) stickyRR.handleMessage(message);
 
     if (message.channel.id === CHAT_CHANNEL_ID) {
-      const data = loadData();
-      const userId = message.author.id;
-      const stats = getUserData(data, userId);
+      const db = getDb();
+
+let stats =
+  await db.collection("chatstats")
+  .findOne({
+    userId: message.author.id
+  });
+
+if (!stats) {
+  stats = {
+    userId: message.author.id,
+    xp: 0,
+    messages: 0
+  };
+}
 
       let xpGain = 2;
       if (message.attachments.size > 0) xpGain += 4;

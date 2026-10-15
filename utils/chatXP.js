@@ -37,9 +37,21 @@ function loadData() {
   return JSON.parse(fs.readFileSync(DATA_PATH));
 }
 
-function saveData(data) {
-  fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
-}
+await db.collection("chatstats")
+.updateOne(
+  {
+    userId: message.author.id
+  },
+  {
+    $set: {
+      xp: stats.xp,
+      messages: stats.messages
+    }
+  },
+  {
+    upsert: true
+  }
+);
 
 function getUserData(data, userId) {
   if (!data.users[userId]) {

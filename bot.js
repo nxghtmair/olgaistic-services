@@ -1,4 +1,10 @@
-const { Client, GatewayIntentBits, ActivityType, Collection } = require("discord.js");
+const {
+  Client,
+  GatewayIntentBits,
+  ActivityType,
+  Collection
+} = require("discord.js");
+
 require("dotenv").config();
 
 const fs = require("fs");
@@ -26,16 +32,37 @@ const client = new Client({
 client.commands = new Collection();
 
 const commandsPath = path.join(__dirname, "commands");
-const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith(".js"));
+
+const commandFiles = fs
+  .readdirSync(commandsPath)
+  .filter(file => file.endsWith(".js"));
 
 for (const file of commandFiles) {
   const command = require(`./commands/${file}`);
+
+  if (!command.data || !command.execute) {
+    console.log(`❌ Invalid command file: ${file}`);
+    continue;
+  }
+
   client.commands.set(command.data.name, command);
 }
 
 // EVENTS
-client.once("ready", () => readyEvent.execute(client, statusConfig));
-client.on("messageCreate", (msg) => messageEvent.execute(msg, stickyRR));
-client.on("interactionCreate", (interaction) => interactionEvent.execute(interaction, client, stickyRR));
+client.once("ready", () =>
+  readyEvent.execute(client, statusConfig)
+);
+
+client.on("messageCreate", (msg) =>
+  messageEvent.execute(msg, stickyRR, client)
+);
+
+client.on("interactionCreate", (interaction) =>
+  interactionEvent.execute(
+    interaction,
+    client,
+    stickyRR
+  )
+);
 
 client.login(process.env.TOKEN);

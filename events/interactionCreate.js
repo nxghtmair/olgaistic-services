@@ -229,30 +229,112 @@ if (
   });
 }
 
-// 24 ANNOUNCEMENT
+// ─────────────────────────────────────────────
+// 24 ANNOUNCEMENT — JIMP IMAGE GENERATION
+// ─────────────────────────────────────────────
 if (
   interaction.isModalSubmit() &&
   interaction.customId === "24_announce_modal"
 ) {
   const desc =
-    interaction.fields.getTextInputValue("24_desc");
+    interaction.fields.getTextInputValue(
+      "24_desc"
+    );
 
-  const embed = new EmbedBuilder()
-    .setColor("#0A5CFF")
-    .setDescription(desc)
-    .setImage(
-      "https://cdn.discordapp.com/attachments/1212370536416677949/1559205924869120000/ae7fdb06-9a57-4795-90a8-a0c58864bd6a.png"
-    )
-    .setFooter({
-      text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇"
-    });
+  const nickname =
+    interaction.member?.nickname ||
+    interaction.user.username;
 
-  await interaction.channel.send({
-    embeds: [embed]
+  const Jimp = require("jimp");
+
+  const template =
+    await Jimp.read(
+      "./assets/24template.png"
+    );
+
+  const boxX = 150;
+  const boxY = 150;
+  const boxW = 900;
+  const boxH = 500;
+
+  const font =
+    await Jimp.loadFont(
+      Jimp.FONT_SANS_32_BLACK
+    );
+
+  template.print(
+    font,
+    boxX,
+    boxY,
+    {
+      text: desc,
+      alignmentX:
+        Jimp.HORIZONTAL_ALIGN_CENTER,
+      alignmentY:
+        Jimp.VERTICAL_ALIGN_MIDDLE
+    },
+    boxW,
+    boxH
+  );
+
+  const outPath =
+    "./assets/24output.png";
+
+  await template.writeAsync(
+    outPath
+  );
+
+  const embed =
+    new EmbedBuilder()
+      .setTitle(
+        "↳ ❝ [24' News] ¡! ❞"
+      )
+      .setColor("#0A5CFF")
+      .setFooter({
+        text:
+          "⋇⊶⊰The Olgas: Season 5⊱⊷⋇"
+      })
+      .setImage(
+        "attachment://24output.png"
+      );
+
+  const announcerComponent = {
+    type: ComponentType.ActionRow,
+    components: [
+      {
+        type: ComponentType.Button,
+        style:
+          ButtonStyle.Secondary,
+        label:
+          `🗨️ Announcer: ${nickname}`,
+        custom_id:
+          "announcer_display",
+        disabled: true
+      }
+    ]
+  };
+
+  const channel =
+    await client.channels.fetch(
+      "1553495305591328888"
+    );
+
+  await channel.send({
+    embeds: [embed],
+    components: [
+      announcerComponent
+    ],
+    files: [
+      {
+        attachment: outPath,
+        name: "24output.png"
+      }
+    ]
   });
 
   return interaction.reply({
-    content: "✔ Announcement sent.",
+    content:
+      "✔ Announcement sent.",
     ephemeral: true
   });
 }

@@ -34,7 +34,7 @@ module.exports = {
       const title = interaction.fields.getTextInputValue("title");
       const desc = interaction.fields.getTextInputValue("desc");
       const image = interaction.fields.getTextInputValue("image");
-      const thumb = interaction.fields.getTextInputValue("thumb");
+      
 
       const embed = new EmbedBuilder()
         .setColor("#0A5CFF")
@@ -43,7 +43,7 @@ module.exports = {
       if (title) embed.setTitle(title);
       if (desc) embed.setDescription(desc);
       if (image) embed.setImage(image);
-      if (thumb) embed.setThumbnail(thumb);
+      
 
       await interaction.channel.send({ embeds: [embed] });
 
@@ -56,55 +56,76 @@ module.exports = {
     // ─────────────────────────────────────────────
     // EMBED ADDON — ADD 2 EMBEDS TO EXISTING MESSAGE
     // ─────────────────────────────────────────────
-    if (interaction.isModalSubmit() && interaction.customId.startsWith("embed_addon_modal_")) {
-      const msgId = interaction.customId.replace("embed_addon_modal_", "");
+   if (
+  interaction.isModalSubmit() &&
+  interaction.customId.startsWith("embed_addon_modal_")
+) {
+  const msgId =
+    interaction.customId.replace(
+      "embed_addon_modal_",
+      ""
+    );
 
-      const title1 = interaction.fields.getTextInputValue("title_1");
-      const desc1 = interaction.fields.getTextInputValue("desc_1");
-      const title2 = interaction.fields.getTextInputValue("title_2");
-      const desc2 = interaction.fields.getTextInputValue("desc_2");
+  const title =
+    interaction.fields.getTextInputValue(
+      "title"
+    );
 
-      const channel = interaction.channel;
-      const msg = await channel.messages.fetch(msgId).catch(() => null);
+  const desc =
+    interaction.fields.getTextInputValue(
+      "desc"
+    );
 
-      if (!msg) {
-        return interaction.reply({
-          content: "❌ Message not found.",
-          ephemeral: true
-        });
-      }
+  const image =
+    interaction.fields.getTextInputValue(
+      "image"
+    );
 
-      const newEmbeds = [...msg.embeds];
+  const msg =
+    await interaction.channel.messages
+      .fetch(msgId)
+      .catch(() => null);
 
-      if (title1 || desc1) {
-        const e1 = new EmbedBuilder()
-          .setColor("#0A5CFF")
-          .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" });
+  if (!msg) {
+    return interaction.reply({
+      content: "❌ Message not found.",
+      ephemeral: true
+    });
+  }
 
-        if (title1) e1.setTitle(title1);
-        if (desc1) e1.setDescription(desc1);
+  const embeds =
+    msg.embeds.map(embed =>
+      EmbedBuilder.from(embed)
+    );
 
-        newEmbeds.push(e1);
-      }
-
-      if (title2 || desc2) {
-        const e2 = new EmbedBuilder()
-          .setColor("#0A5CFF")
-          .setFooter({ text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇" });
-
-        if (title2) e2.setTitle(title2);
-        if (desc2) e2.setDescription(desc2);
-
-        newEmbeds.push(e2);
-      }
-
-      await msg.edit({ embeds: newEmbeds });
-
-      return interaction.reply({
-        content: "✔ Added embeds.",
-        ephemeral: true
+  const newEmbed =
+    new EmbedBuilder()
+      .setColor("#0A5CFF")
+      .setFooter({
+        text:
+          "⋇⊶⊰The Olgas: Season 5⊱⊷⋇"
       });
-    }
+
+  if (title)
+    newEmbed.setTitle(title);
+
+  if (desc)
+    newEmbed.setDescription(desc);
+
+  if (image)
+    newEmbed.setImage(image);
+
+  embeds.push(newEmbed);
+
+  await msg.edit({
+    embeds
+  });
+
+  return interaction.reply({
+    content: "✔ Embed added.",
+    ephemeral: true
+  });
+}
 
     // ─────────────────────────────────────────────
     // OLGAID — ACCOUNT ADD MODAL
@@ -181,6 +202,60 @@ module.exports = {
         ephemeral: true
       });
     }
+
+// QOTD MODAL
+if (
+  interaction.isModalSubmit() &&
+  interaction.customId === "qotd_create_modal"
+) {
+  const desc =
+    interaction.fields.getTextInputValue("qotd_desc");
+
+  const embed = new EmbedBuilder()
+    .setColor("#0A5CFF")
+    .setTitle("QOTD")
+    .setDescription(desc)
+    .setFooter({
+      text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇"
+    });
+
+  await interaction.channel.send({
+    embeds: [embed]
+  });
+
+  return interaction.reply({
+    content: "✔ QOTD sent.",
+    ephemeral: true
+  });
+}
+
+// 24 ANNOUNCEMENT
+if (
+  interaction.isModalSubmit() &&
+  interaction.customId === "24_announce_modal"
+) {
+  const desc =
+    interaction.fields.getTextInputValue("24_desc");
+
+  const embed = new EmbedBuilder()
+    .setColor("#0A5CFF")
+    .setDescription(desc)
+    .setImage(
+      "https://cdn.discordapp.com/attachments/1212370536416677949/1559205924869120000/ae7fdb06-9a57-4795-90a8-a0c58864bd6a.png"
+    )
+    .setFooter({
+      text: "⋇⊶⊰The Olgas: Season 5⊱⊷⋇"
+    });
+
+  await interaction.channel.send({
+    embeds: [embed]
+  });
+
+  return interaction.reply({
+    content: "✔ Announcement sent.",
+    ephemeral: true
+  });
+}
 
     // ─────────────────────────────────────────────
     // CONFESSION SYSTEM (unchanged)

@@ -7,6 +7,7 @@ const LEADERBOARD_CHANNEL_ID = "1555618153231552584";
 const LEADERBOARD_MESSAGE_ID = "1559212395102994527"; // FIXED — always edit THIS message
 const OLGA_OF_CHATS_ROLE_ID = "1559138180274585640";
 const OLGA_OF_CHATS_ANNOUNCE_CHANNEL_ID = "1517175386021040138";
+const LB_LOG_CHANNEL_ID = "1560564008526815292";
 
 const LEVELS = [
   { key: "rookie", name: "Rookie Olga", roleId: "1559137733077893202", xp: 0 },
@@ -163,11 +164,90 @@ async function updateLeaderboard(client) {
   await msg.edit({ embeds: [leaderboardEmbed, olgaEmbed] });
 }
 
+
+async function sendLeaderboardLog(
+  client
+) {
+
+  const data = loadData();
+
+  const guild =
+    client.guilds.cache.first();
+
+  if (!guild) return;
+
+  const channel =
+    guild.channels.cache.get(
+      LB_LOG_CHANNEL_ID
+    );
+
+  if (!channel) return;
+
+  const usersArr =
+    Object.entries(data.users)
+    .sort(
+      (a, b) =>
+      b[1].xp - a[1].xp
+    );
+
+  let desc = "";
+
+  let rank = 1;
+
+  for (const [userId, stats] of usersArr) {
+
+    const level =
+      getLevelForXp(stats.xp);
+
+    desc +=
+`#${rank}
+<@${userId}>
+XP: ${stats.xp}
+Messages: ${stats.messages}
+Level: ${level.name}
+
+`;
+
+    rank++;
+  }
+
+  if (!desc) {
+    desc = "No data.";
+  }
+
+  await channel.send({
+    flags: 4096,
+    embeds: [
+      {
+        title:
+          "🤖lb logs",
+
+        description:
+          desc,
+
+        color:
+          0x0A5CFF,
+
+        image: {
+          url:
+            "https://cdn.discordapp.com/attachments/1212370536416677949/1559140867917484073/630ce052-5810-46e0-b237-1b18cb772544.png"
+        },
+
+        footer: {
+          text:
+            "⋇⊶⊰The Olgas: Season 5⊱⊷⋇"
+        }
+      }
+    ]
+  });
+}
+
 module.exports = {
   CHAT_CHANNEL_ID,
   LEVELS,
   loadData,
   saveData,
+  sendLeaderboardLog,
   getUserData,
   getLevelForXp,
   getNextLevel,

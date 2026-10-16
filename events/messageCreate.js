@@ -16,7 +16,8 @@ const {
   getNextLevel,
   updateUserRoles,
   recalcOlgaOfChats,
-  updateLeaderboard
+  updateLeaderboard,
+  sendLeaderboardLog
 } = require("../utils/chatXP");
 
 const LEVEL_UP_CHANNEL_ID = "1513932845922385920";
@@ -79,6 +80,7 @@ module.exports = {
         setInterval(async () => {
           try {
             await updateLeaderboard(client);
+            await sendLeaderboardLog(client);
           } catch (err) {
             console.log("Leaderboard edit error:", err.message);
           }

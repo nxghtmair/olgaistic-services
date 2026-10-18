@@ -7,6 +7,26 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds]
 });
 
+client.on("debug", msg => {
+  console.log("DEBUG:", msg);
+});
+
+client.on("error", err => {
+  console.error("ERROR:", err);
+});
+
+client.on("shardError", err => {
+  console.error("SHARD ERROR:", err);
+});
+
+client.on("shardDisconnect", event => {
+  console.log("DISCONNECT:", event);
+});
+
+client.on("invalidated", () => {
+  console.log("TOKEN INVALIDATED");
+});
+
 client.once("ready", () => {
   console.log(
     "READY:",

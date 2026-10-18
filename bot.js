@@ -32,15 +32,7 @@ const interactionEvent = require("./events/interactionCreate.js");
 
 console.log("J");
 
-const statusConfig = require("./status.js");
 
-// Commands
-const stickyRR = require("./commands/stickyrr.js");
-
-// Events
-const readyEvent = require("./events/ready.js");
-const messageEvent = require("./events/messageCreate.js");
-const interactionEvent = require("./events/interactionCreate.js");
 
 const client = new Client({
   intents: [

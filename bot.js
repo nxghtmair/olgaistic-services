@@ -79,6 +79,7 @@ client.on("interactionCreate", (interaction) =>
   )
 );
 console.log("BOOT 3");
+
 console.log(
   "TOKEN EXISTS:",
   !!process.env.TOKEN
@@ -89,13 +90,25 @@ console.log(
   process.env.TOKEN?.length
 );
 
-client.login(process.env.TOKEN)
-  .then(() => {
-    console.log("LOGIN SUCCESS");
-  })
-  .catch(err => {
+console.log("ATTEMPTING LOGIN");
+
+(async () => {
+  try {
+    const result =
+      await client.login(
+        process.env.TOKEN
+      );
+
+    console.log(
+      "LOGIN SUCCESS",
+      result?.slice?.(0, 10)
+    );
+  }
+  catch (err) {
+
     console.error(
-      "LOGIN ERROR:",
+      "LOGIN ERROR",
       err
     );
-  });
+  }
+})();

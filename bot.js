@@ -63,9 +63,9 @@ for (const file of commandFiles) {
 }
 
 // EVENTS
-client.once("ready", () =>
-  readyEvent.execute(client, statusConfig)
-);
+client.once("ready", () => {
+  console.log("READY EVENT FIRED");
+});
 
 client.on("messageCreate", (msg) =>
   messageEvent.execute(msg, stickyRR, client)

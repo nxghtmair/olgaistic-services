@@ -1,4 +1,3 @@
-throw new Error("BOT FILE LOADED");
 const { Client, GatewayIntentBits } =
   require("discord.js");
 
@@ -15,4 +14,18 @@ client.once("ready", () => {
   );
 });
 
-client.login(process.env.TOKEN);
+client.on("error", console.error);
+client.on("warn", console.warn);
+
+console.log("ATTEMPTING LOGIN");
+
+client.login(process.env.TOKEN)
+  .then(() => {
+    console.log("LOGIN SUCCESS");
+  })
+  .catch(err => {
+    console.error(
+      "LOGIN ERROR:",
+      err
+    );
+  });

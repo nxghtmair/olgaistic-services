@@ -1,4 +1,3 @@
-console.log("A");
 const {
   Client,
   GatewayIntentBits,
@@ -6,33 +5,20 @@ const {
   Collection
 } = require("discord.js");
 
-console.log("B");
 require("dotenv").config();
 
-console.log("C");
 const fs = require("fs");
-
-console.log("D");
 const path = require("path");
 
-console.log("E");
 const statusConfig = require("./status.js");
 
-console.log("F");
+// Commands
 const stickyRR = require("./commands/stickyrr.js");
 
-console.log("G");
+// Events
 const readyEvent = require("./events/ready.js");
-
-console.log("H");
 const messageEvent = require("./events/messageCreate.js");
-
-console.log("I");
 const interactionEvent = require("./events/interactionCreate.js");
-
-console.log("J");
-
-
 
 const client = new Client({
   intents: [
@@ -63,9 +49,9 @@ for (const file of commandFiles) {
 }
 
 // EVENTS
-client.once("ready", () => {
-  console.log("READY EVENT FIRED");
-});
+client.once("ready", () =>
+  readyEvent.execute(client, statusConfig)
+);
 
 client.on("messageCreate", (msg) =>
   messageEvent.execute(msg, stickyRR, client)
@@ -78,47 +64,5 @@ client.on("interactionCreate", (interaction) =>
     stickyRR
   )
 );
-console.log("BOOT 3");
 
-console.log(
-  "TOKEN EXISTS:",
-  !!process.env.TOKEN
-);
-
-console.log(
-  "TOKEN LENGTH:",
-  process.env.TOKEN?.length
-);
-
-console.log("ATTEMPTING LOGIN");
-process.on("unhandledRejection", err => {
-  console.error("UNHANDLED REJECTION:", err);
-});
-
-process.on("uncaughtException", err => {
-  console.error("UNCAUGHT EXCEPTION:", err);
-});
-
-client.on("error", err => {
-  console.error("CLIENT ERROR:", err);
-});
-(async () => {
-  try {
-    const result =
-      await client.login(
-        process.env.TOKEN
-      );
-
-    console.log(
-      "LOGIN SUCCESS",
-      result?.slice?.(0, 10)
-    );
-  }
-  catch (err) {
-
-    console.error(
-      "LOGIN ERROR",
-      err
-    );
-  }
-})();
+client.login(process.env.TOKEN);

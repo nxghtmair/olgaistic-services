@@ -206,10 +206,6 @@ module.exports = {
 // ─────────────────────────────────────────────
 // QOTD SYSTEM
 // ─────────────────────────────────────────────
-await interaction.deferReply({
-  ephemeral: true
-});
-
 if (
   interaction.isModalSubmit() &&
   interaction.customId === "qotd_create_modal"
@@ -263,9 +259,10 @@ if (
     autoArchiveDuration: 1440
   });
 
-  return interaction.editReply({
-  content: "✔ QOTD sent."
-});
+  return interaction.reply({
+    content: "✔ QOTD sent.",
+    ephemeral: true
+  });
 }
 
 // ─────────────────────────────────────────────
@@ -275,10 +272,6 @@ if (
   interaction.isModalSubmit() &&
   interaction.customId === "24_announce_modal"
 ) {
-await interaction.deferReply({
-  ephemeral: true
-});
-
   const desc =
     interaction.fields.getTextInputValue(
       "24_desc"
@@ -375,9 +368,11 @@ await interaction.deferReply({
     ]
   });
 
-  return interaction.editReply({
-  content: "✔ Announcement sent."
-});
+  return interaction.reply({
+    content:
+      "✔ Announcement sent.",
+    ephemeral: true
+  });
 }
 
     // ─────────────────────────────────────────────

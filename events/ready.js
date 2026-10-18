@@ -1,4 +1,3 @@
-
 const { ActivityType } = require("discord.js");
 
 module.exports = {
@@ -6,11 +5,6 @@ module.exports = {
   once: true,
 
   async execute(client, statusConfig) {
-    console.log(
-  "LOGGED AS:",
-  client.user.tag,
-  client.user.id
-);
     console.log(`Logged in as ${client.user.tag}`);
 
     // Presence
@@ -130,6 +124,3 @@ catch (err) {
 }
   }
 };
-
-
-

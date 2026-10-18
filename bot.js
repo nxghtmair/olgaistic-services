@@ -1,3 +1,4 @@
+console.log("BOOT 1");
 const {
   Client,
   GatewayIntentBits,
@@ -6,7 +7,7 @@ const {
 } = require("discord.js");
 
 require("dotenv").config();
-
+console.log("BOOT 2");
 const fs = require("fs");
 const path = require("path");
 
@@ -64,5 +65,5 @@ client.on("interactionCreate", (interaction) =>
     stickyRR
   )
 );
-
+console.log("BOOT 3");
 client.login(process.env.TOKEN);

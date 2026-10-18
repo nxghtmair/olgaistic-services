@@ -124,3 +124,5 @@ catch (err) {
 }
   }
 };
+
+console.log("BOT READY");

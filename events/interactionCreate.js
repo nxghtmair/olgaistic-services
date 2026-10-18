@@ -483,3 +483,6 @@ async function updateOlgaIdStatsEmbed(client, data) {
 
   await msg.edit({ embeds: [embed] });
 }
+
+
+console.log("Hi");

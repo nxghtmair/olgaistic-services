@@ -79,4 +79,23 @@ client.on("interactionCreate", (interaction) =>
   )
 );
 console.log("BOOT 3");
-client.login(process.env.TOKEN);
+console.log(
+  "TOKEN EXISTS:",
+  !!process.env.TOKEN
+);
+
+console.log(
+  "TOKEN LENGTH:",
+  process.env.TOKEN?.length
+);
+
+client.login(process.env.TOKEN)
+  .then(() => {
+    console.log("LOGIN SUCCESS");
+  })
+  .catch(err => {
+    console.error(
+      "LOGIN ERROR:",
+      err
+    );
+  });

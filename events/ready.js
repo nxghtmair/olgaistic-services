@@ -1,3 +1,8 @@
+console.log(
+  "LOGGED AS:",
+  client.user.tag,
+  client.user.id
+);
 const { ActivityType } = require("discord.js");
 
 module.exports = {

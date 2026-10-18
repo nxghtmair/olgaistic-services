@@ -1,3 +1,4 @@
+throw new Error("BOT FILE LOADED");
 const { Client, GatewayIntentBits } =
   require("discord.js");
 

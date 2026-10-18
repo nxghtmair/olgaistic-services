@@ -3,6 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+
+
+  "engines": {
+    "node": "20.x"
+  },
+  
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -20,5 +26,7 @@
     "mongodb": "^7.7.0",
     "node-fetch": "^3.3.2",
     "pureimage": "^0.4.20"
+    
   }
+  
 }

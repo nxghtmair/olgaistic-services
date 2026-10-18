@@ -1,4 +1,4 @@
-console.log("BOOT 1");
+console.log("A");
 const {
   Client,
   GatewayIntentBits,
@@ -6,10 +6,31 @@ const {
   Collection
 } = require("discord.js");
 
+console.log("B");
 require("dotenv").config();
-console.log("BOOT 2");
+
+console.log("C");
 const fs = require("fs");
+
+console.log("D");
 const path = require("path");
+
+console.log("E");
+const statusConfig = require("./status.js");
+
+console.log("F");
+const stickyRR = require("./commands/stickyrr.js");
+
+console.log("G");
+const readyEvent = require("./events/ready.js");
+
+console.log("H");
+const messageEvent = require("./events/messageCreate.js");
+
+console.log("I");
+const interactionEvent = require("./events/interactionCreate.js");
+
+console.log("J");
 
 const statusConfig = require("./status.js");
 

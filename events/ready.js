@@ -127,22 +127,3 @@ catch (err) {
 
 console.log("BOT READY");
 
-client.once("ready", async () => {
-  console.log(
-    "READY AS:",
-    client.user.tag
-  );
-
-  const guild =
-    client.guilds.cache.first();
-
-  console.log(
-    "GUILDS:",
-    client.guilds.cache.size
-  );
-
-  console.log(
-    "GUILD:",
-    guild?.name
-  );
-});

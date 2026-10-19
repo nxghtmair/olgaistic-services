@@ -12,24 +12,30 @@ process.on("uncaughtException", (error) => {
   process.exitCode = 1;
 });
 
-// Start the web server
-try {
-  require("./server.js");
-} catch (error) {
-  console.error("[WEB] Failed to load server:", error);
-}
-
-// Start the Discord bot only when configured
-if (!process.env.TOKEN) {
-  console.error(
-    "[BOT] TOKEN is missing. Configure it in your .env file."
-  );
-  console.log("[WEB] The web server can still run.");
-} else {
+async function start() {
+  // Start the website
   try {
-    require("./bot.js");
-    console.log("[BOT] Startup requested.");
+    require("./server.js");
   } catch (error) {
-    console.error("[BOT] Failed to load bot:", error);
+    console.error("[WEB] Failed to load server:", error);
+  }
+
+  if (!process.env.TOKEN) {
+    console.error("[BOT] TOKEN is missing.");
+    return;
+  }
+
+  try {
+    const startBot = require("./bot.js");
+
+    console.log("[BOT] Starting Discord login...");
+
+    await startBot();
+
+    console.log("[BOT] Discord login completed.");
+  } catch (error) {
+    console.error("[BOT] Startup failed:", error);
   }
 }
+
+start();

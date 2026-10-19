@@ -1,3 +1,4 @@
+console.log(__filename);
 const {
   Client,
   GatewayIntentBits,

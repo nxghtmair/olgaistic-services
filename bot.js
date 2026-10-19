@@ -71,6 +71,10 @@ client.on("error", (error) => {
   console.error("[BOT] Discord client error:", error);
 });
 
+console.log(
+  "[BOT] Token present:",
+  Boolean(process.env.TOKEN)
+);
 client.login(process.env.TOKEN).catch((error) => {
   console.error("[BOT] Login failed:", error.message);
 });

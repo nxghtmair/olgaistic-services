@@ -65,4 +65,11 @@ client.on("interactionCreate", (interaction) =>
   )
 );
 
-client.login(process.env.TOKEN);
+
+client.on("error", (error) => {
+  console.error("[BOT] Discord client error:", error);
+});
+
+client.login(process.env.TOKEN).catch((error) => {
+  console.error("[BOT] Login failed:", error.message);
+});

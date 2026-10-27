@@ -187,6 +187,7 @@ async function getLogChannel(client) {
   );
 }
 
+
 function makeUserLines(entries, guild) {
   return entries.map((entry, index) => {
     const user = entry.user;
@@ -195,18 +196,17 @@ function makeUserLines(entries, guild) {
 
     return [
       `**${index + 1}. ${name}**`,
-      `Wallet: ${money(user.wallet)}`,
-      `Bank: ${money(user.bank)}`,
-      `Total: ${money((Number(user.wallet) || 0) + (Number(user.bank) || 0))}`,
-      `Earned: ${money(user.earned)}`,
-      `Spent: ${money(user.spent)}`,
-      `Fines: ${money(user.fines)}`,
-      `Stolen: ${money(user.stolen)}`,
-      `Lost: ${money(user.lost)}`,
-      `Items: ${Array.isArray(user.inventory) ? user.inventory.length : 0}`
-    ].join(" • ");
+      `• Withdrawn: ${money(user.wallet)}`,
+      `• Bank: ${money(user.bank)}`,
+      `• Total: ${money(
+        (Number(user.wallet) || 0) +
+        (Number(user.bank) || 0)
+      )}`,
+      `• Lifetime earned: ${money(user.earned)}`
+    ].join("\n");
   });
 }
+
 
 function buildStatsDescription(entries, guild) {
   if (!entries.length) {

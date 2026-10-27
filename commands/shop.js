@@ -84,7 +84,7 @@ module.exports = {
 
     await interaction.reply({
       components: [buildShop(items, page)],
-      flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral
+      flags: MessageFlags.IsComponentsV2 
     });
 
     const message = await interaction.fetchReply();

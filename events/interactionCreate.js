@@ -17,16 +17,9 @@ module.exports = {
       return command.execute(interaction, client);
     }
 
-    // StickyRR modal
-    if (interaction.isModalSubmit() && interaction.customId === "stickyrr_modal") {
-      return stickyRR.handleModal(interaction);
-    }
+   
 
-    // StickyRR button
-    if (interaction.isButton() && interaction.customId.startsWith("stickyrr_button_")) {
-      return stickyRR.handleButton(interaction);
-    }
-
+   
     // ─────────────────────────────────────────────
     // EMBED CREATE — SINGLE EMBED
     // ─────────────────────────────────────────────
@@ -127,81 +120,9 @@ module.exports = {
   });
 }
 
-    // ─────────────────────────────────────────────
-    // OLGAID — ACCOUNT ADD MODAL
-    // ─────────────────────────────────────────────
-    if (interaction.isModalSubmit() && interaction.customId === "olgaid_add_modal") {
-      const username = interaction.fields.getTextInputValue("olgaid_username");
-      const dataPath = "./olgaIdData.json";
+   
 
-      if (!fs.existsSync(dataPath)) {
-        fs.writeFileSync(
-          dataPath,
-          JSON.stringify({ users: {}, statsMessageId: null, statsChannelId: null }, null, 2)
-        );
-      }
-
-      const data = JSON.parse(fs.readFileSync(dataPath));
-      const userId = interaction.user.id;
-
-      if (!data.users[userId]) data.users[userId] = [];
-      data.users[userId].push(username);
-
-      fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
-
-      await updateOlgaIdStatsEmbed(client, data);
-
-      return interaction.reply({
-        content: `✔ Added Olga account \`${username}\`.`,
-        ephemeral: true
-      });
-    }
-
-    // ─────────────────────────────────────────────
-    // OLGAID — ACCOUNT DELETE MODAL
-    // ─────────────────────────────────────────────
-    if (interaction.isModalSubmit() && interaction.customId === "olgaid_delete_modal") {
-      const username = interaction.fields.getTextInputValue("olgaid_delete_username");
-      const dataPath = "./olgaIdData.json";
-
-      if (!fs.existsSync(dataPath)) {
-        return interaction.reply({
-          content: "❌ You don't have any Olga accounts registered.",
-          ephemeral: true
-        });
-      }
-
-      const data = JSON.parse(fs.readFileSync(dataPath));
-      const userId = interaction.user.id;
-      const accounts = data.users?.[userId] || [];
-
-      if (!accounts.length) {
-        return interaction.reply({
-          content: "❌ You don't have any Olga accounts registered.",
-          ephemeral: true
-        });
-      }
-
-      const idx = accounts.indexOf(username);
-      if (idx === -1) {
-        return interaction.reply({
-          content: "❌ That username isn't registered on your OlgaID.",
-          ephemeral: true
-        });
-      }
-
-      accounts.splice(idx, 1);
-      data.users[userId] = accounts;
-
-      fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
-
-      await updateOlgaIdStatsEmbed(client, data);
-
-      return interaction.reply({
-        content: `✔ Deleted Olga account \`${username}\`.`,
-        ephemeral: true
-      });
-    }
+    
 
 // ─────────────────────────────────────────────
 // QOTD SYSTEM

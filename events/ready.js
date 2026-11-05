@@ -29,24 +29,7 @@ module.exports = {
 
     console.log("Commands registered.");
 
-    // Initialize economy
-    try {
-      const economy = require("../utils/economy");
-
-      await economy.restoreFromLatestLog(client);
-
-      const data = economy.loadData();
-      await economy.updateStats(client, data, {
-        skipLog: true
-      });
-
-      console.log("[ECONOMY] Economy initialized.");
-    } catch (error) {
-      console.error(
-        "[ECONOMY] Startup failed:",
-        error
-      );
-    }
+   
 
     // Restore chat XP from lb logs
     try {

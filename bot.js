@@ -11,7 +11,7 @@ const path = require("path");
 const statusConfig = require("./status.js");
 
 // Commands
-const stickyRR = require("./commands/stickyrr.js");
+
 
 // Events
 const readyEvent = require("./events/ready.js");
@@ -58,7 +58,7 @@ async function startBot() {
 
   client.on("messageCreate", msg => {
     Promise.resolve(
-      messageEvent.execute(msg, stickyRR, client)
+      messageEvent.execute(msg, client)
     ).catch(error => {
       console.error("[BOT] Message handler failed:", error);
     });
@@ -66,7 +66,7 @@ async function startBot() {
 
   client.on("interactionCreate", interaction => {
     Promise.resolve(
-      interactionEvent.execute(interaction, client, stickyRR)
+      interactionEvent.execute(interaction, client,)
     ).catch(error => {
       console.error("[BOT] Interaction handler failed:", error);
     });

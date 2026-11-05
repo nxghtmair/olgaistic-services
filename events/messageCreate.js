@@ -1,3 +1,4 @@
+
 const { EmbedBuilder } = require("discord.js");
 const fs = require("fs");
 
@@ -35,7 +36,7 @@ module.exports = {
 
     if (stickyRR?.handleMessage) stickyRR.handleMessage(message);
 
-    if (message.channel.id === CHAT_CHANNEL_ID) {
+    if (CHAT_CHANNEL_ID.includes(message.channel.id)) {
       const data = loadData();
       const userId = message.author.id;
       const stats = getUserData(data, userId);
